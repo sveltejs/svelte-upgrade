@@ -1,0 +1,13 @@
+{{#await promise}}
+	<p>waiting...</p>
+{{then value}}
+	<p>value: {{value}}</p>
+{{catch error}}
+	<p>error: {{error.message}}</p>
+{{/await}}
+
+{{#await promise then value}}
+	<p>value: {{value}}</p>
+{{catch error}}
+	<p>error: {{error.message}}</p>
+{{/await}}

@@ -1,0 +1,30 @@
+{
+  "name": "svelte-upgrade",
+  "description": "Upgrade Svelte templates",
+  "version": "1.0.0",
+  "repository": "sveltejs/svelte-upgrade",
+  "main": "dist/svelte-upgrade.umd.js",
+  "module": "dist/svelte-upgrade.esm.js",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "esm": "^3.0.17",
+    "glob": "^7.1.2",
+    "rollup": "^0.52.0",
+    "sander": "^0.6.0",
+    "tape-modern": "^1.0.0"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "test": "node -r esm test/test.js",
+    "prepublishOnly": "npm test && npm run build"
+  },
+  "license": "LIL",
+  "dependencies": {
+    "estree-walker": "^0.5.1",
+    "magic-string": "^0.24.0",
+    "sade": "^1.4.0",
+    "svelte": "^1.60.3"
+  }
+}
