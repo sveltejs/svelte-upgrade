@@ -1,5 +1,5 @@
 {
-  "name": "@sveltejs/upgrade",
+  "name": "svelte-upgrade",
   "description": "Upgrade Svelte templates",
   "version": "1.0.0",
   "repository": "sveltejs/svelte-upgrade",
