@@ -1,7 +1,7 @@
 {
   "name": "svelte-upgrade",
   "description": "Upgrade Svelte templates",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": "sveltejs/svelte-upgrade",
   "main": "dist/index.js",
   "bin": {
@@ -11,11 +11,8 @@
     "dist"
   ],
   "devDependencies": {
-    "esm": "^3.0.17",
-    "glob": "^7.1.2",
     "rollup": "^0.57.1",
     "rollup-plugin-json": "^2.3.0",
-    "sander": "^0.6.0",
     "tape-modern": "^1.0.0"
   },
   "scripts": {
@@ -28,6 +25,7 @@
   "dependencies": {
     "clorox": "^1.0.3",
     "estree-walker": "^0.5.1",
+    "glob": "^7.1.2",
     "magic-string": "^0.24.0",
     "prompts": "^0.1.8",
     "sade": "^1.4.0",
