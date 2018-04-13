@@ -36,7 +36,7 @@ export function upgradeTemplate(source) {
 		trimEnd(node);
 	}
 
-	walk(ast, {
+	walk(ast.html, {
 		enter(node) {
 			let a = node.start;
 			let b = node.end;
