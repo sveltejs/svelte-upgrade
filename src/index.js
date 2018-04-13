@@ -101,8 +101,32 @@ export function upgradeTemplate(source) {
 					break;
 
 				case 'Element':
+				case 'Window':
+				case 'Head':
 					if (node.name === 'slot' && /{{\s*yield\s*}}/.test(source.slice(a, b))) {
 						code.overwrite(a, b, '<slot></slot>');
+					}
+
+					else if (node.name[0] === ':') {
+						const name = `svelte:${node.name[1].toLowerCase()}`;
+						code.overwrite(a + 1, a + 3, name);
+
+						while (source[b - 1] !== '<') b -= 1;
+						if (source[b] === '/') {
+							code.overwrite(b + 1, b + 3, name);
+						}
+					}
+
+					if (node.name === ':Component') {
+						a = node.expression.start;
+						while (source[a - 1] !== '{') a -= 1;
+
+						b = node.expression.end;
+						while (source[b] !== '}') b += 1;
+
+						const shouldQuote = /\s/.test(source.slice(a, b));
+						if (shouldQuote) code.prependRight(a - 1, '"').appendLeft(b + 1, '"');
+						code.prependRight(a - 1, 'this=')
 					}
 			}
 		},
