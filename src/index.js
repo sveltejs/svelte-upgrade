@@ -128,6 +128,11 @@ export function upgradeTemplate(source) {
 						if (shouldQuote) code.prependRight(a - 1, '"').appendLeft(b + 1, '"');
 						code.prependRight(a - 1, 'this=')
 					}
+
+				case 'Attribute':
+					if (source[a] === ':') {
+						code.overwrite(a, a + 1, '{').appendLeft(b, '}');
+					}
 			}
 		},
 
