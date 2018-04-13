@@ -31,12 +31,12 @@ Prior to the release of Svelte v2, it is possible to opt in to the new syntax by
 ```html
 <!-- before -->
 <div class="item {{active ? 'highlighted' : ''}}">
-	{{name}}
+  {{name}}
 </div>
 
 <!-- after -->
 <div class="item {active ? 'highlighted' : ''}">
-	{name}
+  {name}
 </div>
 ```
 
@@ -115,12 +115,12 @@ Prior to the release of Svelte v2, it is possible to opt in to the new syntax by
 ```html
 <!-- before -->
 <div class='blog-post'>
-	{{{post.content}}}
+  {{{post.content}}}
 </div>
 
 <!-- after -->
 <div class='blog-post'>
-	{@html post.content}
+  {@html post.content}
 </div>
 ```
 
