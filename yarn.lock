@@ -69,6 +69,10 @@ date-time@^2.1.0:
   dependencies:
     time-zone "^1.0.0"
 
+esm@^3.0.17:
+  version "3.0.17"
+  resolved "https://registry.yarnpkg.com/esm/-/esm-3.0.17.tgz#09ff38ed2a5317821372322909063f6a4271a083"
+
 estree-walker@^0.3.0:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-0.3.1.tgz#e6b1a51cf7292524e7237c312e5fe6660c1ce1aa"

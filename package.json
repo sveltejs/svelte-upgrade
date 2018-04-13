@@ -11,6 +11,7 @@
     "dist"
   ],
   "devDependencies": {
+    "esm": "^3.0.17",
     "rollup": "^0.57.1",
     "rollup-plugin-json": "^2.3.0",
     "tape-modern": "^1.0.0"
