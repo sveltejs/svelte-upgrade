@@ -1,5 +1,9 @@
 # TODO changelog
 
+## 1.0.2
+
+* Add missing `bin` file
+
 ## 1.0.1
 
 * Tidy up
