@@ -74,7 +74,7 @@ Prior to the release of Svelte v2, it is possible to opt in to the new syntax by
 
 <!-- after -->
 <ul>
-  {#each cats as cat key cat.name}
+  {#each cats as cat (cat.name)}
     <li><a target='_blank' href={cat.video}>{cat.name}</a></li>
   {/each}
 </ul>
