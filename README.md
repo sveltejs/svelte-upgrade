@@ -23,8 +23,6 @@ If files will be overwritten, you'll be prompted for confirmation. Use `--force`
 
 Prior to the release of Svelte v2, it is possible to opt in to the new syntax by passing the `parser: 'v2'` option to the compiler, either directly or via your rollup-plugin-svelte or svelte-loader options.
 
-*Note: the [PR](https://github.com/sveltejs/svelte/pull/1330) is currently in progress; stable releases of Svelte do not currently support this option. Soon...*
-
 
 ## Svelte v2 syntax changes
 
