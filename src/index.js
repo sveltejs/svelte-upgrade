@@ -50,7 +50,7 @@ export function upgradeTemplate(source) {
 					code.overwrite(a + 1, node.expression.start, '@html ').remove(b - 2, b);
 					break;
 
-				case 'AwaitBlock': 
+				case 'AwaitBlock':
 					trim(node);
 
 					if (node.pending.start !== null) {
@@ -83,7 +83,7 @@ export function upgradeTemplate(source) {
 							c = node.else.children[0].expression.end;
 							node.else.children[0].skip = true;
 						}
-						
+
 						while (source[c] !== '}') c += 1;
 						code.remove(c, c + 1);
 					}
@@ -95,7 +95,11 @@ export function upgradeTemplate(source) {
 					if (node.key) {
 						let a = node.expression.end;
 						while (source[a] !== '@') a += 1;
-						code.overwrite(a, a + 1, `key ${node.context}.`);
+						code.overwrite(a, a + 1, `(${node.context}.`);
+
+						while (!/\w/.test(source[a])) a += 1;
+						while (/\w/.test(source[a])) a += 1;
+						code.appendLeft(a, ')');
 					}
 
 					break;

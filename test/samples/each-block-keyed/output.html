@@ -1,5 +1,5 @@
 <ul>
-	{#each cats as cat key cat.name}
+	{#each cats as cat (cat.name)}
 		<li><a target='_blank' href='{cat.video}'>{cat.name}</a></li>
 	{/each}
 </ul>
