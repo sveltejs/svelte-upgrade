@@ -1,0 +1,15 @@
+<script>
+	export default {
+		computed: {
+			b: ({ a }) => a * 2,
+			c: ({ b }) => b * 2,
+			d: ({ c }) => c * 2,
+			e: function({ d }) {
+				return d * 2;
+			},
+			f: function({ e }) {
+				return e * 2;
+			}
+		}
+	};
+</script>
