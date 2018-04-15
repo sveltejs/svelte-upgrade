@@ -133,6 +133,15 @@ export function upgradeTemplate(source) {
 						code.prependRight(a - 1, 'this=')
 					}
 
+					break;
+
+				case 'Text':
+					let c = -1;
+					while ((c = node.data.indexOf('{', c + 1)) !== -1) {
+						code.overwrite(a + c, a + c + 1, '&#123;');
+					}
+					break;
+
 				case 'Attribute':
 					if (source[a] === ':') {
 						code.overwrite(a, a + 1, '{').appendLeft(b, '}');
