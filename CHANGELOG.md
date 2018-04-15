@@ -1,5 +1,10 @@
 # TODO changelog
 
+## 1.0.5
+
+* Implement `--output`
+* Escape single curlies
+
 ## 1.0.4
 
 * Fix borked publish
