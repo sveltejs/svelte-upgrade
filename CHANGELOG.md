@@ -1,5 +1,9 @@
 # TODO changelog
 
+## 1.0.6
+
+* Update computed props to use destructuring
+
 ## 1.0.5
 
 * Implement `--output`
