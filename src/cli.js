@@ -32,7 +32,7 @@ prog.command(`v2 <input>`)
 
 			const upgrade = await import('./index.js');
 
-			let output = input;
+			let output = opts.output || input;
 
 			if (stats.isDirectory()) {
 				const files = glob.sync('**/*.+(html|svelte)', { cwd: input });
@@ -66,7 +66,7 @@ prog.command(`v2 <input>`)
 			input.forEach((src, i) => {
 				const dest = output[i];
 				const upgraded = upgrade.upgradeTemplate(fs.readFileSync(src, 'utf-8'));
-				
+
 				mkdirp(path.dirname(dest));
 				fs.writeFileSync(dest, upgraded);
 			});
