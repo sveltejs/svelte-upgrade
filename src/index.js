@@ -146,6 +146,7 @@ export function upgradeTemplate(source) {
 					if (source[a] === ':') {
 						code.overwrite(a, a + 1, '{').appendLeft(b, '}');
 					}
+					break;
 			}
 		},
 
