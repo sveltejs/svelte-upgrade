@@ -72,6 +72,7 @@ export function upgradeTemplate(source) {
 					break;
 
 				case 'IfBlock':
+				case 'EachBlock':
 					if (!node.skip) trim(node);
 
 					if (node.else) {
@@ -87,10 +88,6 @@ export function upgradeTemplate(source) {
 						while (source[c] !== '}') c += 1;
 						code.remove(c, c + 1);
 					}
-					break;
-
-				case 'EachBlock':
-					trim(node);
 
 					if (node.key) {
 						let a = node.expression.end;

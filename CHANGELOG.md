@@ -1,5 +1,9 @@
 # svelte-upgrade changelog
 
+## 1.0.11
+
+* Handle each-else blocks
+
 ## 1.0.10
 
 * Handle spread props
