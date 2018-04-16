@@ -146,6 +146,11 @@ export function upgradeTemplate(source) {
 					if (source[a] === ':') {
 						code.overwrite(a, a + 1, '{').appendLeft(b, '}');
 					}
+
+					break;
+
+				case 'Spread':
+					code.remove(a, a + 1).remove(b - 1, b);
 					break;
 			}
 		},

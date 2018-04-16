@@ -1,5 +1,9 @@
 # svelte-upgrade changelog
 
+## 1.0.10
+
+* Handle spread props
+
 ## 1.0.9
 
 * Fix handling of `await-then` blocks
