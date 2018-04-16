@@ -159,33 +159,35 @@ export function upgradeTemplate(source) {
 		const defaultExport = ast.js.content.body.find(node => node.type === 'ExportDefaultDeclaration');
 		if (defaultExport) {
 			const computedProperties = defaultExport.declaration.properties.find(prop => prop.key.name === 'computed');
-			computedProperties.value.properties.forEach(prop => {
-				const { params } = prop.value;
+			if (computedProperties) {
+				computedProperties.value.properties.forEach(prop => {
+					const { params } = prop.value;
 
-				if (prop.value.type === 'FunctionExpression') {
-					let a = prop.value.start + 8;
-					while (source[a] !== '(') a += 1;
+					if (prop.value.type === 'FunctionExpression') {
+						let a = prop.value.start + 8;
+						while (source[a] !== '(') a += 1;
 
-					let b = params[0].start;
-					code.overwrite(a, b, '({ ');
+						let b = params[0].start;
+						code.overwrite(a, b, '({ ');
 
-					a = b = params[params.length - 1].end;
-					while (source[b] !== ')') b += 1;
-					code.overwrite(a, b + 1, ' })');
-				} else if (prop.value.type === 'ArrowFunctionExpression') {
-					let a = prop.value.start;
-					let b = params[0].start;
+						a = b = params[params.length - 1].end;
+						while (source[b] !== ')') b += 1;
+						code.overwrite(a, b + 1, ' })');
+					} else if (prop.value.type === 'ArrowFunctionExpression') {
+						let a = prop.value.start;
+						let b = params[0].start;
 
-					if (a !== b) code.remove(a, b);
-					code.prependRight(b, '({ ');
+						if (a !== b) code.remove(a, b);
+						code.prependRight(b, '({ ');
 
-					a = b = params[params.length - 1].end;
-					while (source[b] !== '=') b += 1;
+						a = b = params[params.length - 1].end;
+						while (source[b] !== '=') b += 1;
 
-					if (a !== b) code.remove(a, b);
-					code.appendLeft(a, ' }) ');
-				}
-			});
+						if (a !== b) code.remove(a, b);
+						code.appendLeft(a, ' }) ');
+					}
+				});
+			}
 		}
 	}
 

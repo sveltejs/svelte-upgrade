@@ -1,4 +1,8 @@
-# TODO changelog
+# svelte-upgrade changelog
+
+## 1.0.7
+
+* Upgrade templates with `<script>` but no computed properties
 
 ## 1.0.6
 
