@@ -1,5 +1,9 @@
 # svelte-upgrade changelog
 
+## 1.0.8
+
+* Handle shorthand methods
+
 ## 1.0.7
 
 * Upgrade templates with `<script>` but no computed properties

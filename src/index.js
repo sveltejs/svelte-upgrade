@@ -164,7 +164,8 @@ export function upgradeTemplate(source) {
 					const { params } = prop.value;
 
 					if (prop.value.type === 'FunctionExpression') {
-						let a = prop.value.start + 8;
+						let a = prop.value.start;
+						if (!prop.method) a += 8;
 						while (source[a] !== '(') a += 1;
 
 						let b = params[0].start;
