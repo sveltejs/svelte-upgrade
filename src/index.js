@@ -61,7 +61,7 @@ export function upgradeTemplate(source) {
 						code.remove(c, c + 1);
 					}
 
-					if (node.catch) {
+					if (node.catch.start !== null) {
 						let c = node.catch.start;
 						code.overwrite(c + 1, c + 2, ':');
 

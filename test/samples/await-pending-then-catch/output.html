@@ -1,4 +1,6 @@
-{#await promise then value}
+{#await promise}
+	<p>waiting...</p>
+{:then value}
 	<p>value: {value}</p>
 {:catch error}
 	<p>error: {error.message}</p>
