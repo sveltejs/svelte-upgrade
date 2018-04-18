@@ -124,8 +124,6 @@ Prior to the release of Svelte v2, it is possible to opt in to the new syntax by
 </div>
 ```
 
-If you have strong feelings about these changes, join the discussion on [#1318](https://github.com/sveltejs/svelte/issues/1318).
-
 
 ## License
 
