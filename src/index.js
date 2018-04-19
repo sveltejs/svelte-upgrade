@@ -235,12 +235,14 @@ export function upgradeTemplate(source) {
 					break;
 
 				case 'EventHandler':
-					const { name, parts } = flattenReference(node.expression.callee);
-					if (name === 'store') {
-						if (`$${parts[1].name}` in methods) {
-							console.error(`Not overwriting store method — $${parts[1].name} already exists on component`);
-						} else {
-							code.overwrite(node.expression.start, parts[1].start, '$');
+					if (node.expression) {
+						const { name, parts } = flattenReference(node.expression.callee);
+						if (name === 'store') {
+							if (`$${parts[1].name}` in methods) {
+								console.error(`Not overwriting store method — $${parts[1].name} already exists on component`);
+							} else {
+								code.overwrite(node.expression.start, parts[1].start, '$');
+							}
 						}
 					}
 

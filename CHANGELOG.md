@@ -1,5 +1,9 @@
 # svelte-upgrade changelog
 
+## 1.0.14
+
+* Handle shorthand event listeners
+
 ## 1.0.13
 
 * Show location of errors
