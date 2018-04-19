@@ -124,6 +124,16 @@ Prior to the release of Svelte v2, it is possible to opt in to the new syntax by
 </div>
 ```
 
+### Store methods in event handlers
+
+```html
+<!-- before -->
+<button on:click="store.set({ clicked: true })">click me</button>
+
+<!-- after -->
+<button on:click="$set({ clicked: true })">click me</button>
+```
+
 
 ## License
 
