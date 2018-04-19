@@ -1,5 +1,9 @@
 # svelte-upgrade changelog
 
+## 1.0.13
+
+* Show location of errors
+
 ## 1.0.12
 
 * Overwrite store methods
