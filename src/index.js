@@ -8,6 +8,41 @@ import { walk, childKeys } from 'estree-walker';
 childKeys.EachBlock = childKeys.IfBlock = ['children', 'else'];
 childKeys.Attribute = ['value'];
 
+function hasElseIf(source, node) {
+	const last = node.children[node.children.length - 1];
+
+	let c = last.end;
+	while (source[c] !== '{') c += 1;
+	while (source[c] === '{') c += 1;
+	while (/\s/.test(source[c])) c += 1;
+
+	return source.slice(c, c + 6) === 'elseif';
+}
+
+function flattenReference(node) {
+	const parts = [];
+	const propEnd = node.end;
+
+	while (node.type === 'MemberExpression') {
+		if (node.computed) return null;
+		parts.unshift(node.property);
+
+		node = node.object;
+	}
+
+	parts.unshift(node);
+
+	const propStart = node.end;
+	const name = node.type === 'Identifier'
+		? node.name
+		: node.type === 'ThisExpression' ? 'this' : null;
+
+	if (!name) return null;
+
+	return { name, parts };
+}
+
+
 export function upgradeTemplate(source) {
 	const code = new MagicString(source);
 	const ast = svelte.parse(source);
@@ -34,6 +69,55 @@ export function upgradeTemplate(source) {
 	function trim(node) {
 		trimStart(node);
 		trimEnd(node);
+	}
+
+	const properties = {};
+	const methods = {};
+
+	if (ast.js) {
+		const defaultExport = ast.js.content.body.find(node => node.type === 'ExportDefaultDeclaration');
+		if (defaultExport) {
+			defaultExport.declaration.properties.forEach(prop => {
+				properties[prop.key.name] = prop.value;
+			});
+
+			if (properties.computed) {
+				properties.computed.properties.forEach(prop => {
+					const { params } = prop.value;
+
+					if (prop.value.type === 'FunctionExpression') {
+						let a = prop.value.start;
+						if (!prop.method) a += 8;
+						while (source[a] !== '(') a += 1;
+
+						let b = params[0].start;
+						code.overwrite(a, b, '({ ');
+
+						a = b = params[params.length - 1].end;
+						while (source[b] !== ')') b += 1;
+						code.overwrite(a, b + 1, ' })');
+					} else if (prop.value.type === 'ArrowFunctionExpression') {
+						let a = prop.value.start;
+						let b = params[0].start;
+
+						if (a !== b) code.remove(a, b);
+						code.prependRight(b, '({ ');
+
+						a = b = params[params.length - 1].end;
+						while (source[b] !== '=') b += 1;
+
+						if (a !== b) code.remove(a, b);
+						code.appendLeft(a, ' }) ');
+					}
+				});
+			}
+
+			if (properties.methods) {
+				properties.methods.properties.forEach(prop => {
+					methods[prop.key.name] = prop.value;
+				});
+			}
+		}
 	}
 
 	walk(ast.html, {
@@ -80,7 +164,7 @@ export function upgradeTemplate(source) {
 						while (source[c] !== '{') c += 1;
 						code.overwrite(c + 1, c + 2, ':');
 
-						if (node.else.children.length === 1 && node.else.children[0].type === 'IfBlock') {
+						if (hasElseIf(source, node)) {
 							c = node.else.children[0].expression.end;
 							node.else.children[0].skip = true;
 						}
@@ -149,6 +233,18 @@ export function upgradeTemplate(source) {
 				case 'Spread':
 					code.remove(a, a + 1).remove(b - 1, b);
 					break;
+
+				case 'EventHandler':
+					const { name, parts } = flattenReference(node.expression.callee);
+					if (name === 'store') {
+						if (`$${parts[1].name}` in methods) {
+							console.error(`Not overwriting store method — $${parts[1].name} already exists on component`);
+						} else {
+							code.overwrite(node.expression.start, parts[1].start, '$');
+						}
+					}
+
+					break;
 			}
 		},
 
@@ -157,42 +253,7 @@ export function upgradeTemplate(source) {
 		}
 	});
 
-	if (ast.js) {
-		const defaultExport = ast.js.content.body.find(node => node.type === 'ExportDefaultDeclaration');
-		if (defaultExport) {
-			const computedProperties = defaultExport.declaration.properties.find(prop => prop.key.name === 'computed');
-			if (computedProperties) {
-				computedProperties.value.properties.forEach(prop => {
-					const { params } = prop.value;
 
-					if (prop.value.type === 'FunctionExpression') {
-						let a = prop.value.start;
-						if (!prop.method) a += 8;
-						while (source[a] !== '(') a += 1;
-
-						let b = params[0].start;
-						code.overwrite(a, b, '({ ');
-
-						a = b = params[params.length - 1].end;
-						while (source[b] !== ')') b += 1;
-						code.overwrite(a, b + 1, ' })');
-					} else if (prop.value.type === 'ArrowFunctionExpression') {
-						let a = prop.value.start;
-						let b = params[0].start;
-
-						if (a !== b) code.remove(a, b);
-						code.prependRight(b, '({ ');
-
-						a = b = params[params.length - 1].end;
-						while (source[b] !== '=') b += 1;
-
-						if (a !== b) code.remove(a, b);
-						code.appendLeft(a, ' }) ');
-					}
-				});
-			}
-		}
-	}
 
 	return code.toString();
 }

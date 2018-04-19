@@ -1,5 +1,9 @@
 # svelte-upgrade changelog
 
+## 1.0.12
+
+* Overwrite store methods
+
 ## 1.0.11
 
 * Handle each-else blocks
