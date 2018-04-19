@@ -65,10 +65,20 @@ prog.command(`v2 <input>`)
 
 			input.forEach((src, i) => {
 				const dest = output[i];
-				const upgraded = upgrade.upgradeTemplate(fs.readFileSync(src, 'utf-8'));
 
-				mkdirp(path.dirname(dest));
-				fs.writeFileSync(dest, upgraded);
+				try {
+					const upgraded = upgrade.upgradeTemplate(fs.readFileSync(src, 'utf-8'));
+
+					mkdirp(path.dirname(dest));
+					fs.writeFileSync(dest, upgraded);
+				} catch (err) {
+					console.error(`${clorox.bold.red(`Error transforming ${src}:`)}`);
+					console.error(`${clorox.red(err.message)}`);
+
+					if (err.frame) {
+						console.error(err.frame);
+					}
+				}
 			});
 
 			console.error(`${clorox.cyan(`Wrote ${output.length} ${output.length === 1 ? 'file' : 'files'}`)}`)
