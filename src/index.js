@@ -45,7 +45,13 @@ function flattenReference(node) {
 
 export function upgradeTemplate(source) {
 	const code = new MagicString(source);
-	const ast = svelte.parse(source);
+	const ast = svelte.parse(source.replace(/<style[\s\S]+?<\/style>/gm, m => {
+		let spaces = '';
+		let i = m.length - 14;
+		while (i--) spaces += ' ';
+
+		return `<style>${spaces}</style>`;
+	}));
 
 	function trimStart(node) {
 		let c = node.start;

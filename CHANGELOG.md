@@ -1,5 +1,9 @@
 # svelte-upgrade changelog
 
+## 1.0.15
+
+* Ignore contents of `<style>` tags ([#8](https://github.com/sveltejs/svelte-upgrade/issues/8))
+
 ## 1.0.14
 
 * Handle shorthand event listeners
