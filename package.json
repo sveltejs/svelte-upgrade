@@ -1,7 +1,7 @@
 {
   "name": "svelte-upgrade",
   "description": "Upgrade Svelte templates",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "repository": "sveltejs/svelte-upgrade",
   "main": "dist/index.js",
   "bin": {
