@@ -25,7 +25,7 @@
   },
   "license": "LIL",
   "dependencies": {
-    "clorox": "^1.0.3",
+    "turbocolor": "^2.3.0",
     "estree-walker": "^0.5.1",
     "glob": "^7.1.2",
     "magic-string": "^0.24.0",
