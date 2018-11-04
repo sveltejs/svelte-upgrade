@@ -17,5 +17,5 @@ function testVersion(v, upgrader) {
 	});
 }
 
-testVersion(2, v2);
+// testVersion(2, v2);
 testVersion(3, v3);
