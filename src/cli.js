@@ -3,7 +3,7 @@ import path from 'path';
 import sade from 'sade';
 import glob from 'glob';
 import prompts from 'prompts';
-import tc from 'turbocolor';
+import c from 'kleur';
 import * as pkg from '../package.json';
 
 const prog = sade('svelte-upgrade').version(pkg.version);
@@ -49,8 +49,8 @@ function mkdirp(dir) {
 				if (!opts.force) {
 					const existing = output.filter(file => fs.existsSync(file));
 					if (existing.length > 0) {
-						console.error(tc.cyan(`This will overwrite the following files:`));
-						console.error(tc.gray(existing.join('\n')))
+						console.error(c.cyan(`This will overwrite the following files:`));
+						console.error(c.gray(existing.join('\n')))
 
 						const response = await prompts({
 							type: 'confirm',
@@ -60,7 +60,7 @@ function mkdirp(dir) {
 						});
 
 						if (response.value === false) {
-							console.error(tc.cyan('Aborted'));
+							console.error(c.cyan('Aborted'));
 							return;
 						}
 					}
@@ -75,8 +75,8 @@ function mkdirp(dir) {
 						mkdirp(path.dirname(dest));
 						fs.writeFileSync(dest, upgraded);
 					} catch (err) {
-						console.error(tc.bold.red(`Error transforming ${src}:`));
-						console.error(tc.red(err.message));
+						console.error(c.bold.red(`Error transforming ${src}:`));
+						console.error(c.red(err.message));
 
 						if (err.frame) {
 							console.error(err.frame);
@@ -84,9 +84,9 @@ function mkdirp(dir) {
 					}
 				});
 
-				console.error(tc.cyan(`Wrote ${output.length} ${output.length === 1 ? 'file' : 'files'}`))
+				console.error(c.cyan(`Wrote ${output.length} ${output.length === 1 ? 'file' : 'files'}`))
 			} catch (err) {
-				console.error(tc.red(err.message));
+				console.error(c.red(err.message));
 			}
 		});
 });
