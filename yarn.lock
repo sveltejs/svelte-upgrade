@@ -415,10 +415,15 @@ sourcemap-codec@^1.4.1:
   resolved "https://registry.yarnpkg.com/sourcemap-codec/-/sourcemap-codec-1.4.1.tgz#c8fd92d91889e902a07aee392bdd2c5863958ba2"
   integrity sha512-hX1eNBNuilj8yfFnECh0DzLgwKpBLMIvmhgEhixXNui8lMLBInTI8Kyxt++RwJnMNu7cAUo635L2+N1TxMJCzA==
 
-svelte@1:
+"svelte-1@npm:svelte@1", svelte@1:
   version "1.64.1"
   resolved "https://registry.yarnpkg.com/svelte/-/svelte-1.64.1.tgz#03c97e204e0277c1430f429a6755ca425852e5de"
   integrity sha512-RsEAcVYF90Bq5y4Lgg56LyKiuxiyDTU+5TG2GM0ppa50z446de0vQgnA3eQTrgecPdRR89ZIqNqN1cgdAdO7wQ==
+
+"svelte-2@npm:svelte@2":
+  version "2.15.1"
+  resolved "https://registry.yarnpkg.com/svelte/-/svelte-2.15.1.tgz#827da0505184af9529e325b8356c0ed4cba041cd"
+  integrity sha512-Mq9SJ9MXoNpjWLr+rK/xmDr9DT1unZxmVl4hq47qyU/Ksobp6CLEj0FDwLqa4b8/T8nViT7L1hBaDPfD6YNHbg==
 
 tape-modern@^1.1.1:
   version "1.1.1"
