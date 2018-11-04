@@ -28,22 +28,33 @@ export function upgradeTemplate(source) {
 	const properties = {};
 	const methods = {};
 
+	let tag;
+	let namespace;
+
 	if (result.ast.js) {
 		const defaultValues = new Map();
 		result.stats.props.forEach(prop => {
 			defaultValues.set(prop, undefined);
 		});
 
+		const blocks = [];
 		const defaultExport = result.ast.js.content.body.find(node => node.type === 'ExportDefaultDeclaration');
-		if (defaultExport) {
-			const blocks = [];
 
+		if (defaultExport) {
 			// TODO set up indentExclusionRanges
 
 			defaultExport.declaration.properties.forEach(prop => {
 				switch (prop.key.name) {
 					case 'data':
 						handleData(prop.value, defaultValues, code, blocks);
+						break;
+
+					case 'tag':
+						tag = prop.value.value;
+						break;
+
+					case 'namespace':
+						namespace = prop.value.value;
 						break;
 
 					default:
@@ -56,7 +67,7 @@ export function upgradeTemplate(source) {
 				props.push(`export let ${key} = ${value};`)
 			}
 
-			blocks.push(props.join('\n'));
+			if (props.length > 0) blocks.push(props.join('\n'));
 
 			// if (properties.computed) {
 			// 	properties.computed.properties.forEach(prop => {
@@ -99,7 +110,17 @@ export function upgradeTemplate(source) {
 		}
 
 		code.appendLeft(result.ast.js.end, '\n\n');
-		code.move(result.ast.js.start, result.ast.js.end, 0);
+
+		const needsScript = (
+			blocks.length > 0 ||
+			!!result.ast.js.content.body.find(node => node !== defaultExport)
+		);
+
+		if (needsScript) {
+			code.move(result.ast.js.start, result.ast.js.end, 0);
+		} else {
+			code.remove(result.ast.js.start, result.ast.js.end);
+		}
 	}
 
 	walk(result.ast.html, {
@@ -110,16 +131,20 @@ export function upgradeTemplate(source) {
 			switch (node.type) {
 
 			}
-		},
-
-		leave(node) {
-
 		}
 	});
 
+	let upgraded = code.toString().trim();
 
+	if (tag || namespace) { // TODO or bindings
+		const attributes = [];
+		if (tag) attributes.push(`tag="${tag}"`);
+		if (namespace) attributes.push(`namespace="${namespace}"`);
 
-	return code.toString().trim();
+		upgraded = `<svelte:meta ${attributes.join(' ')}/>\n\n${upgraded}`;
+	}
+
+	return upgraded;
 }
 
 function handleData(node, props, code, blocks) {

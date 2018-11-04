@@ -5,10 +5,9 @@ export default {
 	input: ['src/index.js', 'src/cli.js'],
 	output: {
 		dir: 'dist',
-		format: 'cjs'	
+		format: 'cjs'
 	},
 	experimentalCodeSplitting: true,
-	experimentalDynamicImport: true,
 	external: Object.keys(pkg.dependencies),
 	plugins: [
 		json()
