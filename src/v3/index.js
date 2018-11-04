@@ -1,4 +1,4 @@
-import * as svelte from 'svelte';
+import * as svelte from 'svelte-2';
 import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
 
