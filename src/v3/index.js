@@ -23,7 +23,7 @@ export function upgradeTemplate(source) {
 
 	let tag;
 	let namespace;
-	let script_contents;
+	let script_sections = [];
 
 	if (result.ast.js) {
 		const { body } = result.ast.js.content;
@@ -77,7 +77,7 @@ export function upgradeTemplate(source) {
 				props.push(`export let ${key} = ${value};`)
 			}
 
-			if (props.length > 0) blocks.push(props.join('\n'));
+			if (props.length > 0) blocks.push(props.join(indent + '\n'));
 
 			code.overwrite(default_export.start, default_export.end, blocks.join('\n\n'));
 		}
@@ -108,7 +108,10 @@ export function upgradeTemplate(source) {
 				code.remove(a, b);
 			}
 
-			script_contents = code.slice(result.ast.js.content.start, result.ast.js.content.end);
+			const { start } = body[0];
+			const { end } = body[body.length - 1];
+
+			script_sections.push(code.slice(start, end));
 
 			code.move(result.ast.js.start, result.ast.js.end, 0);
 
@@ -118,7 +121,7 @@ export function upgradeTemplate(source) {
 			}
 
 			if (imports.length) {
-				script_contents = `\n${imports.map(x => indent + x).join(`\n`)}\n${script_contents}`;
+				script_sections.unshift(`${imports.join(indent + `\n`)}`);
 			}
 		}
 
@@ -138,16 +141,16 @@ export function upgradeTemplate(source) {
 
 	let upgraded = code.toString().trim();
 
+	if (script_sections.length > 0) {
+		upgraded = `<script>\n${indent}${script_sections.join(`\n\n${indent}`)}\n</script>\n\n${upgraded}`;
+	}
+
 	if (tag || namespace) { // TODO or bindings
 		const attributes = [];
 		if (tag) attributes.push(`tag="${tag}"`);
 		if (namespace) attributes.push(`namespace="${namespace}"`);
 
 		upgraded = `<svelte:meta ${attributes.join(' ')}/>\n\n${upgraded}`;
-	}
-
-	if (script_contents) {
-		upgraded = `<script>${script_contents}</script>\n\n${upgraded}`;
 	}
 
 	return upgraded;
