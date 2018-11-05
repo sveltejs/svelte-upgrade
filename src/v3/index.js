@@ -1,6 +1,7 @@
-import * as svelte from 'svelte-2';
+import * as svelte from 'svelte';
 import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
+import { findDeclarations } from './findDeclarations';
 
 // We need to tell estree-walker that it should always
 // look for an `else` block, otherwise it might get
@@ -32,13 +33,17 @@ export function upgradeTemplate(source) {
 	let namespace;
 
 	if (result.ast.js) {
+		const { body } = result.ast.js.content;
+
 		const defaultValues = new Map();
 		result.stats.props.forEach(prop => {
 			defaultValues.set(prop, undefined);
 		});
 
 		const blocks = [];
-		const defaultExport = result.ast.js.content.body.find(node => node.type === 'ExportDefaultDeclaration');
+		const defaultExport = body.find(node => node.type === 'ExportDefaultDeclaration');
+
+		const declarations = findDeclarations(body);
 
 		if (defaultExport) {
 			// TODO set up indentExclusionRanges
@@ -64,6 +69,7 @@ export function upgradeTemplate(source) {
 
 			let props = [];
 			for (const [key, value] of defaultValues) {
+				if (key === value) continue;
 				props.push(`export let ${key} = ${value};`)
 			}
 
@@ -113,10 +119,28 @@ export function upgradeTemplate(source) {
 
 		const needsScript = (
 			blocks.length > 0 ||
-			!!result.ast.js.content.body.find(node => node !== defaultExport)
+			!!body.find(node => node !== defaultExport)
 		);
 
 		if (needsScript) {
+			if (blocks.length === 0 && defaultExport) {
+				const index = body.indexOf(defaultExport);
+
+				let a = defaultExport.start;
+				let b = defaultExport.end;
+
+				// need to remove whitespace around the default export
+				if (index === 0) {
+					throw new Error(`TODO remove default export from start`);
+				} else if (index === body.length - 1) {
+					while (/\s/.test(source[a - 1])) a -= 1;
+				} else {
+					throw new Error(`TODO remove default export from middle`);
+				}
+
+				code.remove(a, b);
+			}
+
 			code.move(result.ast.js.start, result.ast.js.end, 0);
 		} else {
 			code.remove(result.ast.js.start, result.ast.js.end);
@@ -159,7 +183,6 @@ function handleData(node, props, code, blocks) {
 			enter(child, parent) {
 				if (child.type === 'ReturnStatement') {
 					if (parent !== node.body) {
-						console.log({ parent });
 						error(`can only convert data with a top-level return statement`, child.start);
 					}
 

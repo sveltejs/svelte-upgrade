@@ -31,6 +31,7 @@
     "magic-string": "^0.25.1",
     "prompts": "^1.2.0",
     "sade": "^1.4.1",
+    "svelte": "^2.15.2",
     "svelte-1": "npm:svelte@1",
     "svelte-2": "npm:svelte@2"
   }

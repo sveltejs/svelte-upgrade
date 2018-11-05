@@ -422,7 +422,7 @@ sourcemap-codec@^1.4.1:
   resolved "https://registry.yarnpkg.com/svelte/-/svelte-1.64.1.tgz#03c97e204e0277c1430f429a6755ca425852e5de"
   integrity sha512-RsEAcVYF90Bq5y4Lgg56LyKiuxiyDTU+5TG2GM0ppa50z446de0vQgnA3eQTrgecPdRR89ZIqNqN1cgdAdO7wQ==
 
-"svelte-2@npm:svelte@2":
+"svelte-2@npm:svelte@2", svelte@^2.15.2:
   version "2.15.2"
   resolved "https://registry.yarnpkg.com/svelte/-/svelte-2.15.2.tgz#6aaf4a10307409099ec30dd7c73f746fef32c949"
   integrity sha512-l/YAQQ/ArmUTlEdspyLS7viFtKX0ZRKVmYeizAlvFoJ4vKos+7/aBD8xWxQTUd8EPh1JD95DVy7NK3h8+ITlxw==
