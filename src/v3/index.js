@@ -1,22 +1,16 @@
 import * as svelte from 'svelte';
 import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
-import { findDeclarations } from './findDeclarations';
+import handle_components from './handlers/components.js';
+import handle_data from './handlers/data.js';
+import handle_oncreate from './handlers/oncreate.js';
+import { error, find_declarations } from './utils.js';
 
 // We need to tell estree-walker that it should always
 // look for an `else` block, otherwise it might get
 // the wrong idea about the shape of each/if blocks
 childKeys.EachBlock = childKeys.IfBlock = ['children', 'else'];
 childKeys.Attribute = ['value'];
-
-function error(message, pos) {
-	const e = new Error(message);
-	e.pos = pos;
-
-	// TODO add code frame
-
-	throw e;
-}
 
 export function upgradeTemplate(source) {
 	const code = new MagicString(source);
@@ -25,39 +19,44 @@ export function upgradeTemplate(source) {
 	});
 
 	const indent = code.getIndentString();
-
-	const properties = {};
-	const methods = {};
+	const indent_regex = new RegExp(`^${indent}`, 'gm');
 
 	let tag;
 	let namespace;
+	let script_contents;
 
 	if (result.ast.js) {
 		const { body } = result.ast.js.content;
 
-		const defaultValues = new Map();
+		const default_values = new Map();
 		result.stats.props.forEach(prop => {
-			defaultValues.set(prop, undefined);
+			default_values.set(prop, undefined);
 		});
+
+		const lifecycle_functions = new Set();
 
 		const blocks = [];
 		const imports = [];
-		const defaultExport = body.find(node => node.type === 'ExportDefaultDeclaration');
+		const default_export = body.find(node => node.type === 'ExportDefaultDeclaration');
 
-		const declarations = findDeclarations(body);
+		const declarations = find_declarations(body);
 
-		if (defaultExport) {
+		if (default_export) {
 			// TODO set up indentExclusionRanges
 
-			defaultExport.declaration.properties.forEach(prop => {
+			default_export.declaration.properties.forEach(prop => {
 				switch (prop.key.name) {
 					case 'components':
-						handleComponents(prop.value, declarations, blocks, imports);
+						handle_components(prop.value, declarations, blocks, imports);
 						break;
 
 					case 'data':
-						handleData(prop.value, defaultValues, code, blocks);
+						handle_data(prop.value, default_values, code, blocks);
 						break;
+
+					case 'oncreate': case 'onrender':
+						lifecycle_functions.add('onmount');
+						handle_oncreate(prop.value, code, blocks, indent_regex);
 
 					case 'tag':
 						tag = prop.value.value;
@@ -73,66 +72,29 @@ export function upgradeTemplate(source) {
 			});
 
 			let props = [];
-			for (const [key, value] of defaultValues) {
+			for (const [key, value] of default_values) {
 				if (key === value) continue;
 				props.push(`export let ${key} = ${value};`)
 			}
 
 			if (props.length > 0) blocks.push(props.join('\n'));
 
-			// if (properties.computed) {
-			// 	properties.computed.properties.forEach(prop => {
-			// 		const { params } = prop.value;
-
-			// 		if (prop.value.type === 'FunctionExpression') {
-			// 			let a = prop.value.start;
-			// 			if (!prop.method) a += 8;
-			// 			while (source[a] !== '(') a += 1;
-
-			// 			let b = params[0].start;
-			// 			code.overwrite(a, b, '({ ');
-
-			// 			a = b = params[params.length - 1].end;
-			// 			while (source[b] !== ')') b += 1;
-			// 			code.overwrite(a, b + 1, ' })');
-			// 		} else if (prop.value.type === 'ArrowFunctionExpression') {
-			// 			let a = prop.value.start;
-			// 			let b = params[0].start;
-
-			// 			if (a !== b) code.remove(a, b);
-			// 			code.prependRight(b, '({ ');
-
-			// 			a = b = params[params.length - 1].end;
-			// 			while (source[b] !== '=') b += 1;
-
-			// 			if (a !== b) code.remove(a, b);
-			// 			code.appendLeft(a, ' }) ');
-			// 		}
-			// 	});
-			// }
-
-			// if (properties.methods) {
-			// 	properties.methods.properties.forEach(prop => {
-			// 		methods[prop.key.name] = prop.value;
-			// 	});
-			// }
-
-			code.overwrite(defaultExport.start, defaultExport.end, blocks.join('\n\n'));
+			code.overwrite(default_export.start, default_export.end, blocks.join('\n\n'));
 		}
 
 		code.appendLeft(result.ast.js.end, '\n\n');
 
-		const needsScript = (
+		const needs_script = (
 			blocks.length > 0 ||
-			!!body.find(node => node !== defaultExport)
+			!!body.find(node => node !== default_export)
 		);
 
-		if (needsScript) {
-			if (blocks.length === 0 && defaultExport) {
-				const index = body.indexOf(defaultExport);
+		if (needs_script) {
+			if (blocks.length === 0 && default_export) {
+				const index = body.indexOf(default_export);
 
-				let a = defaultExport.start;
-				let b = defaultExport.end;
+				let a = default_export.start;
+				let b = default_export.end;
 
 				// need to remove whitespace around the default export
 				if (index === 0) {
@@ -146,10 +108,21 @@ export function upgradeTemplate(source) {
 				code.remove(a, b);
 			}
 
+			script_contents = code.slice(result.ast.js.content.start, result.ast.js.content.end);
+
 			code.move(result.ast.js.start, result.ast.js.end, 0);
-		} else {
-			code.remove(result.ast.js.start, result.ast.js.end);
+
+			if (lifecycle_functions.size > 0) {
+				const specifiers = Array.from(lifecycle_functions).sort().join(', ');
+				imports.unshift(`import { ${specifiers} } from 'svelte';`);
+			}
+
+			if (imports.length) {
+				script_contents = `\n${imports.map(x => indent + x).join(`\n`)}\n${script_contents}`;
+			}
 		}
+
+		code.remove(result.ast.js.start, result.ast.js.end);
 	}
 
 	walk(result.ast.html, {
@@ -173,73 +146,9 @@ export function upgradeTemplate(source) {
 		upgraded = `<svelte:meta ${attributes.join(' ')}/>\n\n${upgraded}`;
 	}
 
+	if (script_contents) {
+		upgraded = `<script>${script_contents}</script>\n\n${upgraded}`;
+	}
+
 	return upgraded;
-}
-
-function handleComponents(node, declarations, blocks, imports) {
-	const statements = [];
-
-	node.properties.forEach(component => {
-		if (component.value.type === 'Literal') {
-			statements.push(`import ${component.key.name} from '${component.value.value}';`);
-		} else {
-			if (component.value.name !== component.key.name) {
-				if (declarations.has(component.key.name)) {
-					error(`component name conflicts with existing declaration`, component.start);
-				}
-
-				statements.push(`const ${component.key.name} = ${component.value.name};`);
-			}
-		}
-	});
-
-	if (statements.length > 0) {
-		blocks.push(statements.join('\n'));
-	}
-}
-
-function handleData(node, props, code, blocks) {
-	if (!/FunctionExpression/.test(node.type)) {
-		error(`can only convert 'data' if it is a function expression or arrow function expression`, node.start);
-	}
-
-	let returned;
-
-	if (node.body.type === 'BlockStatement') {
-		walk(node.body, {
-			enter(child, parent) {
-				if (child.type === 'ReturnStatement') {
-					if (parent !== node.body) {
-						error(`can only convert data with a top-level return statement`, child.start);
-					}
-
-					if (returned) {
-						error(`duplicate return statement`, child.start);
-					}
-
-					const index = node.body.body.indexOf(child);
-					if (index !== 0) {
-						throw new Error(`TODO handle statements before return`);
-					}
-
-					returned = child.argument;
-				}
-			}
-		});
-
-		if (!returned) {
-			error(`missing return statement`, child.start);
-		}
-	} else {
-		returned = node.body;
-		while (returned.type === 'ParenthesizedExpression') returned = returned.expression;
-
-		if (returned.type !== 'ObjectExpression') {
-			error(`can only convert an object literal`, returned.start);
-		}
-	}
-
-	returned.properties.forEach(prop => {
-		props.set(prop.key.name, code.original.slice(prop.value.start, prop.value.end));
-	});
 }

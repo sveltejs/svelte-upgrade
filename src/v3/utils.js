@@ -1,6 +1,6 @@
 import { walk } from 'estree-walker';
 
-export function findDeclarations(body) {
+export function find_declarations(body) {
 	const declarations = new Set();
 
 	walk(body, {
@@ -26,4 +26,13 @@ export function findDeclarations(body) {
 	});
 
 	return declarations;
+}
+
+export function error(message, pos) {
+	const e = new Error(message);
+	e.pos = pos;
+
+	// TODO add code frame
+
+	throw e;
 }
