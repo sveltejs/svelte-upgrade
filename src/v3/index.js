@@ -28,35 +28,48 @@ export function upgradeTemplate(source) {
 	if (result.ast.js) {
 		const { body } = result.ast.js.content;
 
-		const default_values = new Map();
+		const props = new Map();
 		result.stats.props.forEach(prop => {
-			default_values.set(prop, undefined);
+			props.set(prop, 'undefined');
 		});
 
-		const lifecycle_functions = new Set();
+		const info = {
+			code,
+			lifecycle_functions: new Set(),
+			props,
+			blocks: [],
+			imports: [],
+			methods: new Set(),
+			declarations: find_declarations(body),
+			indent_regex: new RegExp(`^${indent}`, 'gm')
+		};
 
-		const blocks = [];
-		const imports = [];
 		const default_export = body.find(node => node.type === 'ExportDefaultDeclaration');
-
-		const declarations = find_declarations(body);
 
 		if (default_export) {
 			// TODO set up indentExclusionRanges
 
 			default_export.declaration.properties.forEach(prop => {
+				if (prop.key.name === 'methods') {
+					prop.value.properties.forEach(method => {
+						info.methods.add(method.key.name);
+					});
+				}
+			});
+
+			default_export.declaration.properties.forEach(prop => {
 				switch (prop.key.name) {
 					case 'components':
-						handle_components(prop.value, declarations, blocks, imports);
+						handle_components(prop.value, info);
 						break;
 
 					case 'data':
-						handle_data(prop.value, default_values, code, blocks);
+						handle_data(prop.value, info);
 						break;
 
 					case 'oncreate': case 'onrender':
-						lifecycle_functions.add('onmount');
-						handle_oncreate(prop.value, code, blocks, indent_regex);
+						info.lifecycle_functions.add('onmount');
+						handle_oncreate(prop.value, info);
 
 					case 'tag':
 						tag = prop.value.value;
@@ -71,26 +84,26 @@ export function upgradeTemplate(source) {
 				}
 			});
 
-			let props = [];
-			for (const [key, value] of default_values) {
+			let prop_declarations = [];
+			for (const [key, value] of props) {
 				if (key === value) continue;
-				props.push(`export let ${key} = ${value};`)
+				prop_declarations.push(`export let ${key}${value === 'undefined' ? '' : ` = ${value}`};`);
 			}
 
-			if (props.length > 0) blocks.push(props.join(indent + '\n'));
+			if (prop_declarations.length > 0) info.blocks.push(prop_declarations.join(`\n${indent}`));
 
-			code.overwrite(default_export.start, default_export.end, blocks.join('\n\n'));
+			code.overwrite(default_export.start, default_export.end, info.blocks.join('\n\n'));
 		}
 
 		code.appendLeft(result.ast.js.end, '\n\n');
 
 		const needs_script = (
-			blocks.length > 0 ||
+			info.blocks.length > 0 ||
 			!!body.find(node => node !== default_export)
 		);
 
 		if (needs_script) {
-			if (blocks.length === 0 && default_export) {
+			if (info.blocks.length === 0 && default_export) {
 				const index = body.indexOf(default_export);
 
 				let a = default_export.start;
@@ -115,13 +128,13 @@ export function upgradeTemplate(source) {
 
 			code.move(result.ast.js.start, result.ast.js.end, 0);
 
-			if (lifecycle_functions.size > 0) {
-				const specifiers = Array.from(lifecycle_functions).sort().join(', ');
-				imports.unshift(`import { ${specifiers} } from 'svelte';`);
+			if (info.lifecycle_functions.size > 0) {
+				const specifiers = Array.from(info.lifecycle_functions).sort().join(', ');
+				info.imports.unshift(`import { ${specifiers} } from 'svelte';`);
 			}
 
-			if (imports.length) {
-				script_sections.unshift(`${imports.join(indent + `\n`)}`);
+			if (info.imports.length) {
+				script_sections.unshift(`${info.imports.join(`\n${indent}`)}`);
 			}
 		}
 

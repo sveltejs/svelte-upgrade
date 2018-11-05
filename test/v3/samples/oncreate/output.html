@@ -1,8 +1,11 @@
 <script>
 	import { onmount } from 'svelte';
 
+	// [svelte-upgrade] manual refactor suggested
+	const __this = {};
+
 	onmount(() => {
-		console.log('in oncreate');
+		__this.wasCreated = true;
 	});
 </script>
 

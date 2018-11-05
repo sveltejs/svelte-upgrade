@@ -1,4 +1,5 @@
-export default function handleComponents(node, declarations, blocks, imports) {
+export default function handleComponents(node, info) {
+	const { declarations, blocks } = info;
 	const statements = [];
 
 	node.properties.forEach(component => {

@@ -1,6 +1,8 @@
 import { walk } from 'estree-walker';
 
-export default function handle_data(node, props, code, blocks) {
+export default function handle_data(node, info) {
+	const { props, code } = info;
+
 	if (!/FunctionExpression/.test(node.type)) {
 		error(`can only convert 'data' if it is a function expression or arrow function expression`, node.start);
 	}
