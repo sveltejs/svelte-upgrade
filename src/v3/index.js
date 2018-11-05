@@ -41,6 +41,7 @@ export function upgradeTemplate(source) {
 		});
 
 		const blocks = [];
+		const imports = [];
 		const defaultExport = body.find(node => node.type === 'ExportDefaultDeclaration');
 
 		const declarations = findDeclarations(body);
@@ -50,6 +51,10 @@ export function upgradeTemplate(source) {
 
 			defaultExport.declaration.properties.forEach(prop => {
 				switch (prop.key.name) {
+					case 'components':
+						handleComponents(prop.value, declarations, blocks, imports);
+						break;
+
 					case 'data':
 						handleData(prop.value, defaultValues, code, blocks);
 						break;
@@ -169,6 +174,28 @@ export function upgradeTemplate(source) {
 	}
 
 	return upgraded;
+}
+
+function handleComponents(node, declarations, blocks, imports) {
+	const statements = [];
+
+	node.properties.forEach(component => {
+		if (component.value.type === 'Literal') {
+			statements.push(`import ${component.key.name} from '${component.value.value}';`);
+		} else {
+			if (component.value.name !== component.key.name) {
+				if (declarations.has(component.key.name)) {
+					error(`component name conflicts with existing declaration`, component.start);
+				}
+
+				statements.push(`const ${component.key.name} = ${component.value.name};`);
+			}
+		}
+	});
+
+	if (statements.length > 0) {
+		blocks.push(statements.join('\n'));
+	}
 }
 
 function handleData(node, props, code, blocks) {
