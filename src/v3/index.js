@@ -132,7 +132,9 @@ export function upgradeTemplate(source) {
 
 			script_sections.push(code.slice(start, end));
 
-			code.move(result.ast.js.start, result.ast.js.end, 0);
+			if (result.ast.js.start !== 0) {
+				code.move(result.ast.js.start, result.ast.js.end, 0);
+			}
 
 			if (info.lifecycle_functions.size > 0) {
 				const specifiers = Array.from(info.lifecycle_functions).sort().join(', ');
