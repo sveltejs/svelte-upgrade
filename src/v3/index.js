@@ -12,6 +12,8 @@ import handle_registrants from './handlers/shared/handle_registrants.js';
 import handle_preload from './handlers/preload.js';
 import handle_setup from './handlers/setup.js';
 import { error, find_declarations } from './utils.js';
+import { extract_names } from './scopes.js';
+import rewrite_computed from './rewrite_computed.js';
 
 // We need to tell estree-walker that it should always
 // look for an `else` block, otherwise it might get
@@ -207,9 +209,36 @@ export function upgradeTemplate(source) {
 		code.remove(result.ast.js.start, result.ast.js.end);
 	}
 
+	let scope = new Set();
+	const scopes = [scope];
+
 	walk(result.ast.html, {
 		enter(node, parent) {
 			switch (node.type) {
+				case 'EachBlock':
+					scope = new Set(scope);
+					extract_names(node.context).forEach(name => {
+						scope.add(name);
+					});
+					scopes.push(scope);
+					break;
+
+				case 'ThenBlock':
+					if (parent.value) {
+						scope = new Set(scope);
+						scope.add(parent.value);
+						scopes.push(scope);
+					}
+					break;
+
+				case 'CatchBlock':
+					if (parent.error) {
+						scope = new Set(scope);
+						scope.add(parent.error);
+						scopes.push(scope);
+					}
+					break;
+
 				case 'EventHandler':
 					handle_on_directive(node, info, parent);
 					break;
@@ -217,6 +246,19 @@ export function upgradeTemplate(source) {
 				case 'Action':
 					handle_use_directive(node, info, parent);
 					break;
+
+				case 'MustacheTag':
+				case 'RawMustacheTag':
+					// TODO also need to do this for expressions in blocks, attributes and directives
+					rewrite_computed(node, info, scope);
+					break;
+			}
+		},
+
+		leave(node) {
+			if (node.type === 'EachBlock' || node.type === 'ThenBlock' || node.type === 'CatchBlock') {
+				scopes.pop();
+				scope = scopes[scopes.length - 1];
 			}
 		}
 	});
