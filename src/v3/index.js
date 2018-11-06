@@ -1,13 +1,14 @@
 import * as svelte from 'svelte';
 import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
-import handle_actions from './handlers/actions.js';
 import handle_components from './handlers/components.js';
 import handle_data from './handlers/data.js';
 import handle_methods from './handlers/methods.js';
 import handle_oncreate from './handlers/oncreate.js';
 import handle_on_directive from './handlers/on_directive';
 import handle_use_directive from './handlers/use_directive';
+import handle_registrants from './handlers/shared/handle_registrants.js';
+import handle_setup from './handlers/setup.js';
 import { error, find_declarations } from './utils.js';
 
 // We need to tell estree-walker that it should always
@@ -39,6 +40,7 @@ export function upgradeTemplate(source) {
 		lifecycle_functions: new Set(),
 		props,
 		blocks: [],
+		shared_blocks: [],
 		imports: [],
 		methods: new Set(),
 		declarations: new Set(),
@@ -69,7 +71,11 @@ export function upgradeTemplate(source) {
 			default_export.declaration.properties.forEach(prop => {
 				switch (prop.key.name) {
 					case 'actions':
-						handle_actions(prop.value, info);
+						handle_registrants(prop.value.properties, info, 'action')
+						break;
+
+					case 'animations':
+						handle_registrants(prop.value.properties, info, 'animation')
 						break;
 
 					case 'components':
@@ -78,6 +84,10 @@ export function upgradeTemplate(source) {
 
 					case 'data':
 						handle_data(prop.value, info);
+						break;
+
+					case 'events':
+						handle_registrants(prop.value.properties, info, 'event')
 						break;
 
 					case 'immutable':
@@ -96,8 +106,16 @@ export function upgradeTemplate(source) {
 						handle_oncreate(prop.value, info, 'ondestroy');
 						break;
 
+					case 'setup':
+						handle_setup(prop, info);
+						break;
+
 					case 'tag':
 						tag = prop.value.value;
+						break;
+
+					case 'transitions':
+						handle_registrants(prop.value.properties, info, 'transition')
 						break;
 
 					case 'namespace':
@@ -190,6 +208,11 @@ export function upgradeTemplate(source) {
 
 	if (script_sections.length > 0) {
 		upgraded = `<script>\n${indent}${script_sections.join(`\n\n${indent}`)}\n</script>\n\n${upgraded}`;
+	}
+
+	if (info.shared_blocks.length > 0) {
+		// scope="shared" is subject to change
+		upgraded = `<script scope="shared">\n${indent}${info.shared_blocks.join(`\n\n${indent}`)}\n</script>\n\n${upgraded}`;
 	}
 
 	if (tag || namespace || immutable) { // TODO or bindings
