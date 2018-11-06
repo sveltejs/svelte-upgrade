@@ -2,6 +2,7 @@ import * as svelte from 'svelte';
 import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
 import handle_components from './handlers/components.js';
+import handle_computed from './handlers/computed.js';
 import handle_data from './handlers/data.js';
 import handle_methods from './handlers/methods.js';
 import handle_oncreate from './handlers/oncreate.js';
@@ -44,6 +45,7 @@ export function upgradeTemplate(source) {
 		shared_blocks: [],
 		imports: [],
 		methods: new Set(),
+		computed: new Set(),
 		declarations: new Set(),
 		indent,
 		indent_regex: new RegExp(`^${indent}`, 'gm'),
@@ -67,6 +69,12 @@ export function upgradeTemplate(source) {
 						info.methods.add(method.key.name);
 					});
 				}
+
+				if (prop.key.name === 'computed') {
+					prop.value.properties.forEach(method => {
+						info.computed.add(method.key.name);
+					});
+				}
 			});
 
 			default_export.declaration.properties.forEach(prop => {
@@ -81,6 +89,10 @@ export function upgradeTemplate(source) {
 
 					case 'components':
 						handle_components(prop.value, info);
+						break;
+
+					case 'computed':
+						handle_computed(prop.value, info);
 						break;
 
 					case 'data':
@@ -138,7 +150,7 @@ export function upgradeTemplate(source) {
 				prop_declarations.push(`export let ${key}${value === 'undefined' ? '' : ` = ${value}`};`);
 			}
 
-			if (prop_declarations.length > 0) info.blocks.push(prop_declarations.join(`\n${indent}`));
+			if (prop_declarations.length > 0) info.blocks.unshift(prop_declarations.join(`\n${indent}`));
 
 			code.overwrite(default_export.start, default_export.end, info.blocks.join(`\n\n${indent}`));
 		}

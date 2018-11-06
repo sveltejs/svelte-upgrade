@@ -1,0 +1,16 @@
+<p>{a} + {b} = {c}</p>
+<p>{c} * {c} = {d}</p>
+<p>{d} ^ {d} = {e}</p>
+
+<script>
+	export default {
+		computed: {
+			c: ({ a, b }) => a + b,
+			d: ({ c }) => c * c,
+
+			e: function({ d }) {
+				return Math.pow(d, d);
+			}
+		}
+	};
+</script>
