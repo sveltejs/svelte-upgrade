@@ -1,4 +1,3 @@
-import { error } from '../utils.js';
 import rewrite_this from './shared/rewrite_this.js';
 import { walk } from 'estree-walker';
 
@@ -7,7 +6,7 @@ const voidElementNames = /^(?:area|base|br|col|command|embed|hr|img|input|keygen
 export default function handle_on_directive(node, info, parent) {
 	if (!node.expression) return;
 
-	const { blocks, code } = info;
+	const { code } = info;
 
 	if (node.expression.arguments.length === 0) {
 		code.remove(node.expression.callee.end, node.expression.end);

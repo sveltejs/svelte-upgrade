@@ -1,12 +1,10 @@
-import { error } from '../../utils.js';
-
 export default function rewrite_set(node, info) {
 	if (node.arguments.length !== 1) {
-		error(`expected a single argument`, node.start);
+		info.error(`expected a single argument`, node.start);
 	}
 
 	if (node.arguments[0].type !== 'ObjectExpression') {
-		error(`expected an object literal`, node.arguments[0].start);
+		info.error(`expected an object literal`, node.arguments[0].start);
 	}
 
 	const { properties } = node.arguments[0];

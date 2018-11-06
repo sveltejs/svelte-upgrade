@@ -11,7 +11,7 @@ import handle_use_directive from './handlers/use_directive';
 import handle_registrants from './handlers/shared/handle_registrants.js';
 import handle_preload from './handlers/preload.js';
 import handle_setup from './handlers/setup.js';
-import { error, find_declarations } from './utils.js';
+import { find_declarations, get_code_frame } from './utils.js';
 import { extract_names } from './scopes.js';
 import rewrite_computed from './rewrite_computed.js';
 
@@ -83,7 +83,15 @@ export function upgradeTemplate(source) {
 		indent_regex: new RegExp(`^${indent}`, 'gm'),
 		uses_this: false,
 		uses_dispatch: false,
-		uses_this_properties: new Set()
+		uses_this_properties: new Set(),
+
+		error(message, pos) {
+			const e = new Error(message);
+			e.pos = pos;
+			e.frame = get_code_frame(source, pos);
+
+			throw e;
+		}
 	};
 
 	if (result.ast.js) {

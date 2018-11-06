@@ -1,8 +1,8 @@
-import { error } from '../utils.js';
 import rewrite_this from './shared/rewrite_this.js';
+import add_declaration from './shared/add_declaration.js';
 
 export default function handle_methods(node, info) {
-	const { blocks, code } = info;
+	const { blocks, code, error } = info;
 	const statements = [];
 
 	let suggested = false;
@@ -27,6 +27,7 @@ export default function handle_methods(node, info) {
 
 			suggested = true;
 
+			add_declaration(method.key, info);
 			blocks.push(`${suggestion}export ${node.async ? `async ` : ``}function ${method.key.name}${args} ${str}`);
 		} else if (method.value.type === 'Identifier') {
 			throw new Error(`TODO identifier methods`);
