@@ -1,18 +1,14 @@
+import alias_registration from "./shared/alias_registration";
+
 export default function handle_components(node, info) {
-	const { declarations, blocks } = info;
+	const { blocks } = info;
 	const statements = [];
 
 	node.properties.forEach(component => {
 		if (component.value.type === 'Literal') {
 			statements.push(`import ${component.key.name} from '${component.value.value}';`);
 		} else {
-			if (component.value.name !== component.key.name) {
-				if (declarations.has(component.key.name)) {
-					error(`component name conflicts with existing declaration`, component.start);
-				}
-
-				statements.push(`const ${component.key.name} = ${component.value.name};`);
-			}
+			alias_registration(component, info, statements, 'component');
 		}
 	});
 

@@ -4,7 +4,7 @@ import { walk } from 'estree-walker';
 
 const voidElementNames = /^(?:area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|source|track|wbr)$/;
 
-export default function handle_event_handler(node, info, parent) {
+export default function handle_on_directive(node, info, parent) {
 	if (!node.expression) return;
 
 	const { blocks, code } = info;

@@ -1,11 +1,13 @@
 import * as svelte from 'svelte';
 import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
+import handle_actions from './handlers/actions.js';
 import handle_components from './handlers/components.js';
 import handle_data from './handlers/data.js';
 import handle_methods from './handlers/methods.js';
 import handle_oncreate from './handlers/oncreate.js';
-import handle_event_handler from './handlers/event_handler';
+import handle_on_directive from './handlers/on_directive';
+import handle_use_directive from './handlers/use_directive';
 import { error, find_declarations } from './utils.js';
 
 // We need to tell estree-walker that it should always
@@ -24,6 +26,7 @@ export function upgradeTemplate(source) {
 
 	let tag;
 	let namespace;
+	let immutable;
 	let script_sections = [];
 
 	const props = new Map();
@@ -65,12 +68,20 @@ export function upgradeTemplate(source) {
 
 			default_export.declaration.properties.forEach(prop => {
 				switch (prop.key.name) {
+					case 'actions':
+						handle_actions(prop.value, info);
+						break;
+
 					case 'components':
 						handle_components(prop.value, info);
 						break;
 
 					case 'data':
 						handle_data(prop.value, info);
+						break;
+
+					case 'immutable':
+						immutable = prop.value.value;
 						break;
 
 					case 'methods':
@@ -165,7 +176,11 @@ export function upgradeTemplate(source) {
 		enter(node, parent) {
 			switch (node.type) {
 				case 'EventHandler':
-					handle_event_handler(node, info, parent);
+					handle_on_directive(node, info, parent);
+					break;
+
+				case 'Action':
+					handle_use_directive(node, info, parent);
 					break;
 			}
 		}
@@ -177,10 +192,11 @@ export function upgradeTemplate(source) {
 		upgraded = `<script>\n${indent}${script_sections.join(`\n\n${indent}`)}\n</script>\n\n${upgraded}`;
 	}
 
-	if (tag || namespace) { // TODO or bindings
+	if (tag || namespace || immutable) { // TODO or bindings
 		const attributes = [];
 		if (tag) attributes.push(`tag="${tag}"`);
 		if (namespace) attributes.push(`namespace="${namespace}"`);
+		if (immutable) attributes.push(`immutable`);
 
 		upgraded = `<svelte:meta ${attributes.join(' ')}/>\n\n${upgraded}`;
 	}
