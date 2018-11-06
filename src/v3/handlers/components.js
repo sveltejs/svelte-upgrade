@@ -1,4 +1,4 @@
-import alias_registration from "./shared/alias_registration";
+import alias_registration from './shared/alias_registration.js';
 
 export default function handle_components(node, info) {
 	const { blocks } = info;

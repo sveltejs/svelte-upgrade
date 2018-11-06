@@ -21,6 +21,34 @@ import rewrite_computed from './rewrite_computed.js';
 childKeys.EachBlock = childKeys.IfBlock = ['children', 'else'];
 childKeys.Attribute = ['value'];
 
+const global_whitelist = new Set([
+	'Array',
+	'Boolean',
+	'console',
+	'Date',
+	'decodeURI',
+	'decodeURIComponent',
+	'encodeURI',
+	'encodeURIComponent',
+	'Infinity',
+	'Intl',
+	'isFinite',
+	'isNaN',
+	'JSON',
+	'Map',
+	'Math',
+	'NaN',
+	'Number',
+	'Object',
+	'parseFloat',
+	'parseInt',
+	'Promise',
+	'RegExp',
+	'Set',
+	'String',
+	'undefined',
+]);
+
 export function upgradeTemplate(source) {
 	const code = new MagicString(source);
 	const result = svelte.compile(source, {
@@ -36,7 +64,9 @@ export function upgradeTemplate(source) {
 
 	const props = new Map();
 	result.stats.props.forEach(prop => {
-		props.set(prop, 'undefined');
+		if (!global_whitelist.has(prop)) {
+			props.set(prop, 'undefined');
+		}
 	});
 
 	const info = {
@@ -283,5 +313,5 @@ export function upgradeTemplate(source) {
 		upgraded = `<svelte:meta ${attributes.join(' ')}/>\n\n${upgraded}`;
 	}
 
-	return upgraded;
+	return upgraded.trim();
 }
