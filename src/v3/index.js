@@ -19,7 +19,6 @@ export function upgradeTemplate(source) {
 	});
 
 	const indent = code.getIndentString();
-	const indent_regex = new RegExp(`^${indent}`, 'gm');
 
 	let tag;
 	let namespace;
@@ -41,7 +40,10 @@ export function upgradeTemplate(source) {
 			imports: [],
 			methods: new Set(),
 			declarations: find_declarations(body),
-			indent_regex: new RegExp(`^${indent}`, 'gm')
+			indent_regex: new RegExp(`^${indent}`, 'gm'),
+			uses_this: false,
+			uses_dispatch: false,
+			uses_this_properties: new Set()
 		};
 
 		const default_export = body.find(node => node.type === 'ExportDefaultDeclaration');
@@ -68,8 +70,12 @@ export function upgradeTemplate(source) {
 						break;
 
 					case 'oncreate': case 'onrender':
-						info.lifecycle_functions.add('onmount');
-						handle_oncreate(prop.value, info);
+						handle_oncreate(prop.value, info, 'onmount');
+						break;
+
+					case 'ondestroy': case 'onteardown':
+						handle_oncreate(prop.value, info, 'ondestroy');
+						break;
 
 					case 'tag':
 						tag = prop.value.value;
@@ -92,7 +98,7 @@ export function upgradeTemplate(source) {
 
 			if (prop_declarations.length > 0) info.blocks.push(prop_declarations.join(`\n${indent}`));
 
-			code.overwrite(default_export.start, default_export.end, info.blocks.join('\n\n'));
+			code.overwrite(default_export.start, default_export.end, info.blocks.join(`\n\n${indent}`));
 		}
 
 		code.appendLeft(result.ast.js.end, '\n\n');
@@ -131,6 +137,10 @@ export function upgradeTemplate(source) {
 			if (info.lifecycle_functions.size > 0) {
 				const specifiers = Array.from(info.lifecycle_functions).sort().join(', ');
 				info.imports.unshift(`import { ${specifiers} } from 'svelte';`);
+			}
+
+			if (info.uses_this) {
+				script_sections.unshift(`// [svelte-upgrade] suggestion:\n${indent}// manually refactor all references to __this\n${indent}const __this = {};`);
 			}
 
 			if (info.imports.length) {
