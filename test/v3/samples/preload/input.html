@@ -1,0 +1,10 @@
+<h1>Hello {user.name}</h1>
+
+<script>
+	export default {
+		async preload({ params }) {
+			const user = await this.fetch(`me.json`).then(r => r.json());
+			return { user };
+		}
+	};
+</script>

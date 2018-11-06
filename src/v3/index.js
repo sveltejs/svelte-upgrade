@@ -8,6 +8,7 @@ import handle_oncreate from './handlers/oncreate.js';
 import handle_on_directive from './handlers/on_directive';
 import handle_use_directive from './handlers/use_directive';
 import handle_registrants from './handlers/shared/handle_registrants.js';
+import handle_preload from './handlers/preload.js';
 import handle_setup from './handlers/setup.js';
 import { error, find_declarations } from './utils.js';
 
@@ -104,6 +105,10 @@ export function upgradeTemplate(source) {
 
 					case 'ondestroy': case 'onteardown':
 						handle_oncreate(prop.value, info, 'ondestroy');
+						break;
+
+					case 'preload':
+						handle_preload(prop.value, info);
 						break;
 
 					case 'setup':
