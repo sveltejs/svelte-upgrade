@@ -1,8 +1,6 @@
 import { walk } from 'estree-walker';
 
-export function find_declarations(body) {
-	const declarations = new Set();
-
+export function find_declarations(body, declarations) {
 	walk(body, {
 		enter(node, parent) {
 			if (node.type === 'ImportDeclaration') {

@@ -3,7 +3,9 @@ import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
 import handle_components from './handlers/components.js';
 import handle_data from './handlers/data.js';
+import handle_methods from './handlers/methods.js';
 import handle_oncreate from './handlers/oncreate.js';
+import handle_event_handler from './handlers/event_handler';
 import { error, find_declarations } from './utils.js';
 
 // We need to tell estree-walker that it should always
@@ -24,29 +26,31 @@ export function upgradeTemplate(source) {
 	let namespace;
 	let script_sections = [];
 
+	const props = new Map();
+	result.stats.props.forEach(prop => {
+		props.set(prop, 'undefined');
+	});
+
+	const info = {
+		code,
+		lifecycle_functions: new Set(),
+		props,
+		blocks: [],
+		imports: [],
+		methods: new Set(),
+		declarations: new Set(),
+		indent,
+		indent_regex: new RegExp(`^${indent}`, 'gm'),
+		uses_this: false,
+		uses_dispatch: false,
+		uses_this_properties: new Set()
+	};
+
 	if (result.ast.js) {
 		const { body } = result.ast.js.content;
 
-		const props = new Map();
-		result.stats.props.forEach(prop => {
-			props.set(prop, 'undefined');
-		});
-
-		const info = {
-			code,
-			lifecycle_functions: new Set(),
-			props,
-			blocks: [],
-			imports: [],
-			methods: new Set(),
-			declarations: find_declarations(body),
-			indent_regex: new RegExp(`^${indent}`, 'gm'),
-			uses_this: false,
-			uses_dispatch: false,
-			uses_this_properties: new Set()
-		};
-
 		const default_export = body.find(node => node.type === 'ExportDefaultDeclaration');
+		find_declarations(body, info.declarations);
 
 		if (default_export) {
 			// TODO set up indentExclusionRanges
@@ -67,6 +71,10 @@ export function upgradeTemplate(source) {
 
 					case 'data':
 						handle_data(prop.value, info);
+						break;
+
+					case 'methods':
+						handle_methods(prop.value, info);
 						break;
 
 					case 'oncreate': case 'onrender':
@@ -142,7 +150,7 @@ export function upgradeTemplate(source) {
 			}
 
 			if (info.uses_this) {
-				script_sections.unshift(`// [svelte-upgrade] suggestion:\n${indent}// manually refactor all references to __this\n${indent}const __this = {};`);
+				script_sections.unshift(`// [svelte-upgrade suggestion]\n${indent}// manually refactor all references to __this\n${indent}const __this = {};`);
 			}
 
 			if (info.imports.length) {
@@ -154,12 +162,11 @@ export function upgradeTemplate(source) {
 	}
 
 	walk(result.ast.html, {
-		enter(node) {
-			let a = node.start;
-			let b = node.end;
-
+		enter(node, parent) {
 			switch (node.type) {
-
+				case 'EventHandler':
+					handle_event_handler(node, info, parent);
+					break;
 			}
 		}
 	});

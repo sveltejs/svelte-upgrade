@@ -1,4 +1,4 @@
-export default function handleComponents(node, info) {
+export default function handle_components(node, info) {
 	const { declarations, blocks } = info;
 	const statements = [];
 
