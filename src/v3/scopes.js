@@ -78,7 +78,6 @@ export class Scope {
 
 export function extract_names(param) {
 	const names = [];
-	console.log(param.type);
 	extractors[param.type](names, param);
 	return names;
 }
