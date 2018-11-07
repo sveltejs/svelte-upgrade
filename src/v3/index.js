@@ -78,6 +78,7 @@ export function upgradeTemplate(source) {
 		imports: [],
 		methods: new Set(),
 		computed: new Set(),
+		helpers: new Set(),
 		declarations: new Set(),
 		indent,
 		indent_regex: new RegExp(`^${indent}`, 'gm'),
@@ -105,14 +106,20 @@ export function upgradeTemplate(source) {
 
 			default_export.declaration.properties.forEach(prop => {
 				if (prop.key.name === 'methods') {
-					prop.value.properties.forEach(method => {
-						info.methods.add(method.key.name);
+					prop.value.properties.forEach(node => {
+						info.methods.add(node.key.name);
 					});
 				}
 
 				if (prop.key.name === 'computed') {
-					prop.value.properties.forEach(method => {
-						info.computed.add(method.key.name);
+					prop.value.properties.forEach(node => {
+						info.computed.add(node.key.name);
+					});
+				}
+
+				if (prop.key.name === 'helpers') {
+					prop.value.properties.forEach(node => {
+						info.helpers.add(node.key.name);
 					});
 				}
 			});
@@ -140,7 +147,11 @@ export function upgradeTemplate(source) {
 						break;
 
 					case 'events':
-						handle_registrants(prop.value.properties, info, 'event')
+						handle_registrants(prop.value.properties, info, 'event');
+						break;
+
+					case 'helpers':
+						handle_registrants(prop.value.properties, info, 'helpers');
 						break;
 
 					case 'immutable':

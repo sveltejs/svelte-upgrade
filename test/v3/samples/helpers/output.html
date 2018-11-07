@@ -1,0 +1,15 @@
+<script>
+	import { qux } from './helpers.js';
+
+	function foo(bar) {
+		return bar * 2;
+	}
+
+	export let baz = 1;
+
+	function bar(baz) {
+		return baz * 2;
+	}
+</script>
+
+<p>{qux(foo(bar(baz)))}</p>

@@ -1,0 +1,27 @@
+<p>{qux(foo(bar(baz)))}</p>
+
+<script>
+	import { qux } from './helpers.js';
+
+	function foo(bar) {
+		return bar * 2;
+	}
+
+	export default {
+		data() {
+			return {
+				baz: 1
+			};
+		},
+
+		helpers: {
+			bar(baz) {
+				return baz * 2;
+			},
+
+			foo,
+
+			qux
+		}
+	};
+</script>
