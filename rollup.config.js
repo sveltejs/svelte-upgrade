@@ -5,7 +5,8 @@ export default {
 	input: ['src/index.js', 'src/cli.js'],
 	output: {
 		dir: 'dist',
-		format: 'cjs'
+		format: 'cjs',
+		sourcemap: true
 	},
 	experimentalCodeSplitting: true,
 	external: Object.keys(pkg.dependencies),

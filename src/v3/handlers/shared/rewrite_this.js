@@ -14,6 +14,7 @@ export default function rewrite_this(node, info, is_event_handler, replacement =
 			if (child.type === 'CallExpression') {
 				if (is_set(child.callee, is_event_handler)) {
 					rewrite_set(child, info);
+					return this.skip();
 				}
 
 				// TODO optimise get

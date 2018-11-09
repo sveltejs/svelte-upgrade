@@ -25,7 +25,7 @@ export default function handle_registrants(registrants, info, type) {
 		} else if (registrant.value.type === 'Identifier') {
 			alias_registration(registrant, info, statements, type);
 		} else {
-			error(`can only convert ${type}s that are function expressions or references`, method);
+			error(`can only convert ${type}s that are function expressions or references`, registrant);
 		}
 	});
 
