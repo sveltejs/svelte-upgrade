@@ -11,6 +11,7 @@ import handle_use_directive from './handlers/use_directive';
 import handle_registrants from './handlers/shared/handle_registrants.js';
 import handle_preload from './handlers/preload.js';
 import handle_setup from './handlers/setup.js';
+import handle_store from './handlers/store.js';
 import { find_declarations, get_code_frame } from './utils.js';
 import { extract_names } from './scopes.js';
 import rewrite_computed from './rewrite_computed.js';
@@ -67,7 +68,7 @@ export function upgradeTemplate(source) {
 
 	const props = new Map();
 	result.stats.props.forEach(prop => {
-		if (!global_whitelist.has(prop)) {
+		if (!global_whitelist.has(prop) && prop[0] !== '$') {
 			props.set(prop, 'undefined');
 		}
 	});
@@ -191,6 +192,10 @@ export function upgradeTemplate(source) {
 
 					case 'setup':
 						handle_setup(prop, info);
+						break;
+
+					case 'store':
+						handle_store(prop, info);
 						break;
 
 					case 'tag':

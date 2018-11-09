@@ -33,6 +33,7 @@ function testVersion(v, upgrader) {
 				actual = upgrader(source);
 				if (v === 3) actual = actual.code;
 
+				fs.writeFileSync(output_file.replace('output.html', '_actual.html'), actual);
 				expected = fs.readFileSync(output_file, 'utf-8');
 			} catch (err) {
 				if (fs.existsSync(error_file)) {
@@ -55,7 +56,7 @@ function testVersion(v, upgrader) {
 				throw new Error(`expected an error, but got output instead`);
 			}
 
-			t.equal(actual, expected);
+			t.equal(actual.trim(), expected.trim());
 		});
 	});
 }
