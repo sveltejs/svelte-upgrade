@@ -31,6 +31,8 @@ function testVersion(v, upgrader) {
 
 			try {
 				actual = upgrader(source);
+				if (v === 3) actual = actual.code;
+
 				expected = fs.readFileSync(output_file, 'utf-8');
 			} catch (err) {
 				if (fs.existsSync(error_file)) {

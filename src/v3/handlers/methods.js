@@ -39,4 +39,6 @@ export default function handle_methods(node, info) {
 	if (statements.length > 0) {
 		blocks.push(`${statements.join('\n')}`);
 	}
+
+	info.manual_edits_suggested = true;
 }

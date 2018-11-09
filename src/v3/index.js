@@ -5,7 +5,7 @@ import handle_components from './handlers/components.js';
 import handle_computed from './handlers/computed.js';
 import handle_data from './handlers/data.js';
 import handle_methods from './handlers/methods.js';
-import handle_oncreate from './handlers/oncreate.js';
+import handle_oncreate_ondestroy from './handlers/oncreate_ondestroy.js';
 import handle_on_directive from './handlers/on_directive';
 import handle_use_directive from './handlers/use_directive';
 import handle_registrants from './handlers/shared/handle_registrants.js';
@@ -14,6 +14,7 @@ import handle_setup from './handlers/setup.js';
 import { find_declarations, get_code_frame } from './utils.js';
 import { extract_names } from './scopes.js';
 import rewrite_computed from './rewrite_computed.js';
+import handle_onstate_onupdate from './handlers/onstate_onupdate.js';
 
 // We need to tell estree-walker that it should always
 // look for an `else` block, otherwise it might get
@@ -48,6 +49,8 @@ const global_whitelist = new Set([
 	'String',
 	'undefined',
 ]);
+
+class UpgradeError extends Error {}
 
 export function upgradeTemplate(source) {
 	const code = new MagicString(source);
@@ -86,8 +89,12 @@ export function upgradeTemplate(source) {
 		uses_dispatch: false,
 		uses_this_properties: new Set(),
 
+		manual_edits_required: false,
+		manual_edits_suggested: false,
+
 		error(message, pos) {
-			const e = new Error(message);
+			const e = new UpgradeError(message);
+			e.name = 'UpgradeError';
 			e.pos = pos;
 			e.frame = get_code_frame(source, pos);
 
@@ -162,12 +169,20 @@ export function upgradeTemplate(source) {
 						handle_methods(prop.value, info);
 						break;
 
-					case 'oncreate': case 'onrender':
-						handle_oncreate(prop.value, info, 'onmount');
+						case 'oncreate': case 'onrender':
+						handle_oncreate_ondestroy(prop.value, info, 'onmount');
 						break;
 
 					case 'ondestroy': case 'onteardown':
-						handle_oncreate(prop.value, info, 'ondestroy');
+						handle_oncreate_ondestroy(prop.value, info, 'ondestroy');
+						break;
+
+					case 'onstate':
+						handle_onstate_onupdate(prop.value, info, 'onprops');
+						break;
+
+					case 'onupdate':
+						handle_onstate_onupdate(prop.value, info, 'onupdate');
 						break;
 
 					case 'preload':
@@ -248,6 +263,7 @@ export function upgradeTemplate(source) {
 
 			if (info.uses_this) {
 				script_sections.unshift(`// [svelte-upgrade suggestion]\n${indent}// manually refactor all references to __this\n${indent}const __this = {};`);
+				info.manual_edits_suggested = true;
 			}
 
 			if (info.imports.length) {
@@ -332,5 +348,9 @@ export function upgradeTemplate(source) {
 		upgraded = `<svelte:meta ${attributes.join(' ')}/>\n\n${upgraded}`;
 	}
 
-	return upgraded.trim();
+	return {
+		code: upgraded.trim(),
+		manual_edits_required: info.manual_edits_required,
+		manual_edits_suggested: info.manual_edits_suggested
+	};
 }

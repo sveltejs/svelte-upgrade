@@ -1,0 +1,14 @@
+<script>
+	import { onprops } from 'svelte';
+
+	// [svelte-upgrade warning]
+	// onprops and onupdate handlers behave
+	// differently to their v2 counterparts
+	onprops(() => {
+		if (changed.foo) {
+			console.log(current.foo);
+		}
+	});
+</script>
+
+<h1>component with onstate</h1>

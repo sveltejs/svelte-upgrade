@@ -105,24 +105,35 @@ function get_tasks(items, in_dir, out_dir, arr = []) {
 
 				let unchanged_count = 0;
 
+				const manual_edits_required = [];
+				const manual_edits_suggested = [];
+				const failed = [];
+
 				tasks.forEach(({ input, output, source }) => {
+					const relative = path.relative(process.cwd(), input);
 					try {
 						const result = upgrade.upgradeTemplate(source);
 
-						if (result.trim() === source.trim()) {
+						const code = v === 2 ? result : result.code;
+
+						if (code.trim() === source.trim()) {
 							unchanged_count += 1;
+						} else if (result.manual_edits_required) {
+							manual_edits_required.push(relative);
+						} else if (result.manual_edits_suggested) {
+							manual_edits_suggested.push(relative);
 						}
 
 						// we still write, even if unchanged, since the output dir
 						// could be different to the input dir
 						mkdirp(path.dirname(output));
-						fs.writeFileSync(output, result);
+						fs.writeFileSync(output, code);
 					} catch (error) {
-						console.error(c.bold.red(`Error transforming ${input}:`));
-						console.error(c.red(error.message));
-
-						if (error.frame) {
-							console.error(error.frame);
+						if (error.name === 'UpgradeError') {
+							failed.push({ relative, error });
+						} else {
+							console.error(c.bold.red(`Error transforming ${relative}:`));
+							console.error(c.red(error.message));
 						}
 					}
 				});
@@ -134,6 +145,28 @@ function get_tasks(items, in_dir, out_dir, arr = []) {
 				}
 
 				console.error(c.cyan(message));
+
+				if (failed.length > 0) {
+					console.error(c.bold.red(`\nFailed to convert ${count(failed.length)}`));
+					failed.forEach(failure => {
+						console.error(c.bold.red(`\n${failure.error.message}`));
+						console.error(failure.relative);
+
+						if (failure.error.frame) {
+							console.error(failure.error.frame);
+						}
+					});
+				}
+
+				if (manual_edits_required.length > 0) {
+					console.error(c.bold.red(`\nManual edits required for ${count(manual_edits_required.length)}`));
+					console.error(manual_edits_required.join('\n'));
+				}
+
+				if (manual_edits_suggested.length > 0) {
+					console.error(c.bold.magenta(`\nManual edits suggested for ${count(manual_edits_suggested.length)}`));
+					console.error(manual_edits_suggested.join('\n'));
+				}
 			} catch (err) {
 				console.error(c.red(err.message));
 			}
