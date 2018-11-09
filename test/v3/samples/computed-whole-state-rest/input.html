@@ -1,0 +1,9 @@
+<pre>{JSON.stringify(props)}</pre>
+
+<script>
+	export default {
+		computed: {
+			props: ({ unwanted, ...x }) => x
+		}
+	};
+</script>

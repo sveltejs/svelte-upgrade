@@ -8,7 +8,18 @@ export default function handle_computed(node, info) {
 	node.properties.forEach(computed => {
 		let statements = [];
 
-		if (computed.value.params[0].type === 'ObjectPattern') {
+		const uses_whole_state = (
+			computed.value.params[0].type !== 'ObjectPattern' ||
+			computed.value.params[0].properties.some(x => x.type === 'RestElement')
+		);
+
+		if (uses_whole_state) {
+			statements = [
+				`// [svelte-upgrade warning]\n${indent}${indent}// this function needs to be manually rewritten`
+			];
+
+			info.manual_edit_required = true;
+		} else {
 			statements = computed.value.params[0].properties
 				.filter(param => param.value.type !== 'Identifier')
 				.map(param => {
@@ -39,12 +50,6 @@ export default function handle_computed(node, info) {
 					}
 				}
 			});
-		} else {
-			statements = [
-				`// [svelte-upgrade warning]\n${indent}${indent}// this function needs to be manually rewritten`
-			];
-
-			info.manual_edit_required = true;
 		}
 
 		const implicit_return = (
