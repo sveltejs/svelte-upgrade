@@ -13,6 +13,7 @@ export default function handle_oncreate_ondestroy(node, info, name) {
 	}
 
 	else {
-		throw new Error(`TODO non-function-expression ${name}`);
+		const body = code.slice(node.start, node.end).replace(indent_regex, '');
+		blocks.push(`${name}(${body});`);
 	}
 }
