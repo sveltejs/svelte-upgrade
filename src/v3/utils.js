@@ -3,6 +3,8 @@ import { extract_names } from './scopes';
 import { locate } from 'locate-character';
 
 export function find_declarations(body, declarations) {
+	let block_depth = 0;
+
 	walk(body, {
 		enter(node, parent) {
 			if (node.type === 'ImportDeclaration') {
@@ -21,15 +23,27 @@ export function find_declarations(body, declarations) {
 			}
 
 			else if (node.type === 'VariableDeclaration') {
-				node.declarations.forEach(declarator => {
-					extract_names(declarator.id).forEach(name => {
-						declarations.add(name);
+				if (node.kind === 'var' || block_depth === 0) {
+					node.declarations.forEach(declarator => {
+						extract_names(declarator.id).forEach(name => {
+							declarations.add(name);
+						});
 					});
-				});
+				}
 			}
 
 			if (node.type === 'FunctionExpression') {
 				this.skip();
+			}
+
+			if (node.type === 'BlockStatement') {
+				block_depth += 1;
+			}
+		},
+
+		leave(node) {
+			if (node.type === 'BlockStatement') {
+				block_depth -= 1;
 			}
 		}
 	});
