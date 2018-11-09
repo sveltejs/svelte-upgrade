@@ -17,6 +17,7 @@ export function find_declarations(body, declarations) {
 
 			else if (node.type === 'FunctionDeclaration') {
 				declarations.add(node.id.name);
+				this.skip();
 			}
 
 			else if (node.type === 'VariableDeclaration') {
@@ -25,6 +26,10 @@ export function find_declarations(body, declarations) {
 						declarations.add(name);
 					});
 				});
+			}
+
+			if (node.type === 'FunctionExpression') {
+				this.skip();
 			}
 		}
 	});
