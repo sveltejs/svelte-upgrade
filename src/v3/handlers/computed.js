@@ -18,7 +18,7 @@ export default function handle_computed(node, info) {
 				`// [svelte-upgrade warning]\n${indent}${indent}// this function needs to be manually rewritten`
 			];
 
-			info.manual_edit_required = true;
+			info.manual_edits_required = true;
 		} else {
 			statements = computed.value.params[0].properties
 				.filter(param => param.value.type !== 'Identifier')
