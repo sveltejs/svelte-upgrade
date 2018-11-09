@@ -7,8 +7,10 @@ export default function handle_registrants(registrants, info, type) {
 	const statements = [];
 
 	registrants.forEach(registrant => {
-		if (registrant.value.type === 'FunctionExpression') {
-			const { params, body } = registrant.value;
+		const { key, value } = registrant;
+
+		if (value.type === 'FunctionExpression') {
+			const { params, body } = value;
 
 			rewrite_this(body, info);
 
@@ -20,12 +22,16 @@ export default function handle_registrants(registrants, info, type) {
 				? `(${code.slice(params[0].start, params[params.length - 1].end)})`
 				: '()';
 
-			add_declaration(registrant.key, info);
-			blocks.push(`function ${registrant.key.name}${args} ${str}`);
-		} else if (registrant.value.type === 'Identifier') {
+			add_declaration(key, info);
+			blocks.push(`function ${key.name}${args} ${str}`);
+		} else if (value.type === 'Identifier') {
 			alias_registration(registrant, info, statements, type);
 		} else {
-			error(`can only convert ${type}s that are function expressions or references`, registrant);
+			const str = code.slice(value.start, value.end)
+				.replace(info.indent_regex, '')
+				.replace(info.indent_regex, '');
+
+			blocks.push(`const ${key.name} = ${str};`);
 		}
 	});
 

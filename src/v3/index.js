@@ -158,7 +158,7 @@ export function upgradeTemplate(source) {
 						break;
 
 					case 'helpers':
-						handle_registrants(prop.value.properties, info, 'helpers');
+						handle_registrants(prop.value.properties, info, 'helper');
 						break;
 
 					case 'immutable':
