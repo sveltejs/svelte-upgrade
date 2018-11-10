@@ -1,9 +1,9 @@
 import rewrite_this from './shared/rewrite_this.js';
 
 export default function handle_oncreate_ondestroy(node, info, name) {
-	const { code, blocks, lifecycle_functions, indent_regex } = info;
+	const { code, blocks, imported_functions, indent_regex } = info;
 
-	lifecycle_functions.add(name);
+	imported_functions.add(name);
 
 	if (node.type === 'FunctionExpression') {
 		rewrite_this(node.body, info);

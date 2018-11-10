@@ -76,7 +76,7 @@ export function upgradeTemplate(source) {
 	const info = {
 		source,
 		code,
-		lifecycle_functions: new Set(),
+		imported_functions: new Set(),
 		props,
 		blocks: [],
 		shared_blocks: [],
@@ -222,7 +222,13 @@ export function upgradeTemplate(source) {
 				prop_declarations.push(`export let ${key}${value === 'undefined' ? '' : ` = ${value}`};`);
 			}
 
-			if (prop_declarations.length > 0) info.blocks.unshift(prop_declarations.join(`\n${indent}`));
+			if (prop_declarations.length > 0) {
+				info.blocks.unshift(prop_declarations.join(`\n${indent}`));
+			}
+
+			if (info.uses_dispatch) {
+				info.blocks.unshift(`const dispatch = createEventDispatcher();`);
+			}
 
 			code.overwrite(default_export.start, default_export.end, info.blocks.join(`\n\n${indent}`));
 		}
@@ -262,8 +268,8 @@ export function upgradeTemplate(source) {
 				code.move(result.ast.js.start, result.ast.js.end, 0);
 			}
 
-			if (info.lifecycle_functions.size > 0) {
-				const specifiers = Array.from(info.lifecycle_functions).sort().join(', ');
+			if (info.imported_functions.size > 0) {
+				const specifiers = Array.from(info.imported_functions).sort().join(', ');
 				info.imports.unshift(`import { ${specifiers} } from 'svelte';`);
 			}
 

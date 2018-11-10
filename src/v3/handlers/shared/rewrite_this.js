@@ -41,8 +41,9 @@ export default function rewrite_this(node, info, is_event_handler, replacement =
 						switch (child.property.name) {
 							case 'fire':
 								info.uses_dispatch = true;
+								info.imported_functions.add('createEventDispatcher');
 								code.overwrite(child.start, child.end, `dispatch`);
-								break;
+								return this.skip();
 
 							default:
 								code.overwrite(child.object.start, child.object.end, replacement);

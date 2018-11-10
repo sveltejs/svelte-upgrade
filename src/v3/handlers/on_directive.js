@@ -9,6 +9,12 @@ export default function handle_on_directive(node, info, parent) {
 	const { code } = info;
 	const { arguments: args, callee, start, end } = node.expression;
 
+	if (callee.name === 'fire') {
+		info.uses_dispatch = true;
+		info.imported_functions.add('createEventDispatcher');
+		code.overwrite(callee.start, callee.end, 'dispatch');
+	}
+
 	if (args.length === 0 || (args.length === 1 && args[0].name === 'event')) {
 		code.remove(callee.end, end);
 	} else {
