@@ -1,7 +1,7 @@
 import { walk } from 'estree-walker';
 
 export default function handle_data(node, info) {
-	const { props, code, error } = info;
+	const { props, code, error, indent_regex } = info;
 
 	if (!/FunctionExpression/.test(node.type)) {
 		error(`can only convert 'data' if it is a function expression or arrow function expression`, node.start);
@@ -48,6 +48,11 @@ export default function handle_data(node, info) {
 	}
 
 	returned.properties.forEach(prop => {
-		props.set(prop.key.name, code.original.slice(prop.value.start, prop.value.end));
+		const body = code.original.slice(prop.value.start, prop.value.end)
+			.replace(indent_regex, '')
+			.replace(indent_regex, '')
+			.replace(indent_regex, '');
+
+		props.set(prop.key.name, body);
 	});
 }
