@@ -11,7 +11,6 @@ export default function handle_on_directive(node, info, parent) {
 
 	if (callee.name === 'fire') {
 		info.uses_dispatch = true;
-		info.imported_functions.add('createEventDispatcher');
 		code.overwrite(callee.start, callee.end, 'dispatch');
 	}
 

@@ -1,0 +1,13 @@
+<script>
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+
+	// [svelte-upgrade suggestion]
+	// review these functions and remove unnecessary 'export' keywords
+	export function emit(type) {
+		dispatch(type);
+	}
+</script>
+
+<button on:click="{() => emit('select')}">select</button>

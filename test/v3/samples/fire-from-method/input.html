@@ -1,0 +1,11 @@
+<button on:click="emit('select')">select</button>
+
+<script>
+	export default {
+		methods: {
+			emit(type) {
+				this.fire(type);
+			}
+		}
+	}
+</script>

@@ -104,197 +104,128 @@ export function upgradeTemplate(source) {
 		}
 	};
 
-	if (result.ast.js) {
-		const { body } = result.ast.js.content;
+	const body = result.ast.js && result.ast.js.content.body;
+	const default_export = body && body.find(node => node.type === 'ExportDefaultDeclaration');
 
-		const default_export = body.find(node => node.type === 'ExportDefaultDeclaration');
-		find_declarations(body, info.declarations);
+	if (body) find_declarations(body, info.declarations);
 
-		if (default_export) {
-			// TODO set up indentExclusionRanges
+	if (default_export) {
+		// TODO set up indentExclusionRanges
 
-			default_export.declaration.properties.forEach(prop => {
-				if (prop.key.name === 'methods') {
-					prop.value.properties.forEach(node => {
-						info.methods.add(node.key.name);
-					});
-				}
-
-				if (prop.key.name === 'computed') {
-					prop.value.properties.forEach(node => {
-						info.computed.add(node.key.name);
-					});
-				}
-
-				if (prop.key.name === 'helpers') {
-					prop.value.properties.forEach(node => {
-						info.helpers.add(node.key.name);
-					});
-				}
-			});
-
-			default_export.declaration.properties.forEach(prop => {
-				switch (prop.key.name) {
-					case 'actions':
-						handle_registrants(prop.value.properties, info, 'action')
-						break;
-
-					case 'animations':
-						handle_registrants(prop.value.properties, info, 'animation')
-						break;
-
-					case 'components':
-						handle_components(prop.value, info);
-						break;
-
-					case 'computed':
-						handle_computed(prop.value, info);
-						break;
-
-					case 'data':
-						handle_data(prop.value, info);
-						break;
-
-					case 'events':
-						handle_registrants(prop.value.properties, info, 'event');
-						break;
-
-					case 'helpers':
-						handle_registrants(prop.value.properties, info, 'helper');
-						break;
-
-					case 'immutable':
-						immutable = prop.value.value;
-						break;
-
-					case 'methods':
-						handle_methods(prop.value, info);
-						break;
-
-						case 'oncreate': case 'onrender':
-						handle_oncreate_ondestroy(prop.value, info, 'onmount');
-						break;
-
-					case 'ondestroy': case 'onteardown':
-						handle_oncreate_ondestroy(prop.value, info, 'ondestroy');
-						break;
-
-					case 'onstate':
-						handle_onstate_onupdate(prop.value, info, 'onprops');
-						break;
-
-					case 'onupdate':
-						handle_onstate_onupdate(prop.value, info, 'onupdate');
-						break;
-
-					case 'preload':
-						handle_preload(prop.value, info);
-						break;
-
-					case 'setup':
-						handle_setup(prop, info);
-						break;
-
-					case 'store':
-						handle_store(prop, info);
-						break;
-
-					case 'tag':
-						tag = prop.value.value;
-						break;
-
-					case 'transitions':
-						handle_registrants(prop.value.properties, info, 'transition')
-						break;
-
-					case 'namespace':
-						namespace = prop.value.value;
-						break;
-
-					default:
-						throw new Error(`Not implemented: ${prop.key.name}`);
-				}
-			});
-
-			let prop_declarations = [];
-			for (const [key, value] of props) {
-				if (key === value) continue;
-				prop_declarations.push(`export let ${key}${value === 'undefined' ? '' : ` = ${value}`};`);
+		default_export.declaration.properties.forEach(prop => {
+			if (prop.key.name === 'methods') {
+				prop.value.properties.forEach(node => {
+					info.methods.add(node.key.name);
+				});
 			}
 
-			if (prop_declarations.length > 0) {
-				info.blocks.unshift(prop_declarations.join(`\n${indent}`));
+			if (prop.key.name === 'computed') {
+				prop.value.properties.forEach(node => {
+					info.computed.add(node.key.name);
+				});
 			}
 
-			if (info.uses_dispatch) {
-				info.blocks.unshift(`const dispatch = createEventDispatcher();`);
+			if (prop.key.name === 'helpers') {
+				prop.value.properties.forEach(node => {
+					info.helpers.add(node.key.name);
+				});
 			}
+		});
 
-			code.overwrite(default_export.start, default_export.end, info.blocks.join(`\n\n${indent}`));
+		default_export.declaration.properties.forEach(prop => {
+			switch (prop.key.name) {
+				case 'actions':
+					handle_registrants(prop.value.properties, info, 'action')
+					break;
+
+				case 'animations':
+					handle_registrants(prop.value.properties, info, 'animation')
+					break;
+
+				case 'components':
+					handle_components(prop.value, info);
+					break;
+
+				case 'computed':
+					handle_computed(prop.value, info);
+					break;
+
+				case 'data':
+					handle_data(prop.value, info);
+					break;
+
+				case 'events':
+					handle_registrants(prop.value.properties, info, 'event');
+					break;
+
+				case 'helpers':
+					handle_registrants(prop.value.properties, info, 'helper');
+					break;
+
+				case 'immutable':
+					immutable = prop.value.value;
+					break;
+
+				case 'methods':
+					handle_methods(prop.value, info);
+					break;
+
+					case 'oncreate': case 'onrender':
+					handle_oncreate_ondestroy(prop.value, info, 'onmount');
+					break;
+
+				case 'ondestroy': case 'onteardown':
+					handle_oncreate_ondestroy(prop.value, info, 'ondestroy');
+					break;
+
+				case 'onstate':
+					handle_onstate_onupdate(prop.value, info, 'onprops');
+					break;
+
+				case 'onupdate':
+					handle_onstate_onupdate(prop.value, info, 'onupdate');
+					break;
+
+				case 'preload':
+					handle_preload(prop.value, info);
+					break;
+
+				case 'setup':
+					handle_setup(prop, info);
+					break;
+
+				case 'store':
+					handle_store(prop, info);
+					break;
+
+				case 'tag':
+					tag = prop.value.value;
+					break;
+
+				case 'transitions':
+					handle_registrants(prop.value.properties, info, 'transition')
+					break;
+
+				case 'namespace':
+					namespace = prop.value.value;
+					break;
+
+				default:
+					throw new Error(`Not implemented: ${prop.key.name}`);
+			}
+		});
+
+		let prop_declarations = [];
+		for (const [key, value] of props) {
+			if (key === value) continue;
+			prop_declarations.push(`export let ${key}${value === 'undefined' ? '' : ` = ${value}`};`);
 		}
 
-		code.appendLeft(result.ast.js.end, '\n\n');
-
-		const needs_script = (
-			info.blocks.length > 0 ||
-			!!body.find(node => node !== default_export)
-		);
-
-		if (needs_script) {
-			if (info.blocks.length === 0 && default_export) {
-				const index = body.indexOf(default_export);
-
-				let a = default_export.start;
-				let b = default_export.end;
-
-				// need to remove whitespace around the default export
-				if (index === 0) {
-					throw new Error(`TODO remove default export from start`);
-				} else if (index === body.length - 1) {
-					while (/\s/.test(source[a - 1])) a -= 1;
-				} else {
-					throw new Error(`TODO remove default export from middle`);
-				}
-
-				code.remove(a, b);
-			}
-
-			const { start } = body[0];
-			const { end } = body[body.length - 1];
-
-			script_sections.push(code.slice(start, end));
-
-			if (result.ast.js.start !== 0) {
-				code.move(result.ast.js.start, result.ast.js.end, 0);
-			}
-
-			if (info.imported_functions.size > 0) {
-				const specifiers = Array.from(info.imported_functions).sort().join(', ');
-				info.imports.unshift(`import { ${specifiers} } from 'svelte';`);
-			}
-
-			if (info.uses_this) {
-				const this_props = [];
-
-				if (info.uses_this_properties.has('get')) {
-					const props = Array.from(info.props.keys());
-					this_props.push(`get: () => ({ ${props.join(', ')} })`);
-				}
-
-				const rhs = this_props.length
-					? `{\n${indent}${indent}${this_props.join(`\n${indent}${indent}`)}\n${indent}}`
-					: `{}`;
-
-				script_sections.unshift(`// [svelte-upgrade suggestion]\n${indent}// manually refactor all references to __this\n${indent}const __this = ${rhs};`);
-				info.manual_edits_suggested = true;
-			}
-
-			if (info.imports.length) {
-				script_sections.unshift(`${info.imports.join(`\n${indent}`)}`);
-			}
+		if (prop_declarations.length > 0) {
+			info.blocks.unshift(prop_declarations.join(`\n${indent}`));
 		}
 
-		code.remove(result.ast.js.start, result.ast.js.end);
+		code.overwrite(default_export.start, default_export.end, info.blocks.join(`\n\n${indent}`));
 	}
 
 	let scope = new Set();
@@ -350,6 +281,72 @@ export function upgradeTemplate(source) {
 			}
 		}
 	});
+
+	const needs_script = (
+		info.uses_dispatch ||
+		info.blocks.length > 0 ||
+		(body && !!body.find(node => node !== default_export))
+	);
+
+	if (needs_script) {
+		if (info.blocks.length === 0 && default_export) {
+			const index = body.indexOf(default_export);
+
+			let a = default_export.start;
+			let b = default_export.end;
+
+			// need to remove whitespace around the default export
+			if (index === 0) {
+				throw new Error(`TODO remove default export from start`);
+			} else if (index === body.length - 1) {
+				while (/\s/.test(source[a - 1])) a -= 1;
+			} else {
+				throw new Error(`TODO remove default export from middle`);
+			}
+
+			code.remove(a, b);
+		}
+
+		if (info.uses_dispatch) {
+			info.imported_functions.add('createEventDispatcher');
+			script_sections.push(`const dispatch = createEventDispatcher();`);
+		}
+
+		if (body) {
+			const { start } = body[0];
+			const { end } = body[body.length - 1];
+			script_sections.push(code.slice(start, end));
+		}
+
+		if (info.imported_functions.size > 0) {
+			const specifiers = Array.from(info.imported_functions).sort().join(', ');
+			info.imports.unshift(`import { ${specifiers} } from 'svelte';`);
+		}
+
+		if (info.uses_this) {
+			const this_props = [];
+
+			if (info.uses_this_properties.has('get')) {
+				const props = Array.from(info.props.keys());
+				this_props.push(`get: () => ({ ${props.join(', ')} })`);
+			}
+
+			const rhs = this_props.length
+				? `{\n${indent}${indent}${this_props.join(`\n${indent}${indent}`)}\n${indent}}`
+				: `{}`;
+
+			script_sections.unshift(`// [svelte-upgrade suggestion]\n${indent}// manually refactor all references to __this\n${indent}const __this = ${rhs};`);
+			info.manual_edits_suggested = true;
+		}
+
+		if (info.imports.length) {
+			script_sections.unshift(`${info.imports.join(`\n${indent}`)}`);
+		}
+	}
+
+	if (result.ast.js) {
+		code.remove(result.ast.js.start, result.ast.js.end);
+	}
 
 	let upgraded = code.toString().trim();
 
