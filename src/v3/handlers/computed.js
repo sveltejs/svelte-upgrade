@@ -23,6 +23,10 @@ export default function handle_computed(node, info) {
 			statements = computed.value.params[0].properties
 				.filter(param => param.value.type !== 'Identifier')
 				.map(param => {
+					if (param.value.type === 'AssignmentPattern') {
+						info.error(`svelte-upgrade cannot currently process default computed property arguments`, param.start);
+					}
+
 					const { name } = param.key;
 					const lhs = code.slice(param.value.start, param.value.end);
 					const rhs = info.computed.has(name) ? `${name}()` : name;
