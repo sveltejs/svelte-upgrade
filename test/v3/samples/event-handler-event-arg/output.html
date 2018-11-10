@@ -1,0 +1,13 @@
+<script>
+	export let count;
+
+	// [svelte-upgrade suggestion]
+	// review these functions and remove unnecessary 'export' keywords
+	export function doThing(event) {
+		console.log(event);
+	}
+</script>
+
+<button on:click="{doThing}">
+	clicks: {count}
+</button>

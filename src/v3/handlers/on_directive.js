@@ -7,9 +7,10 @@ export default function handle_on_directive(node, info, parent) {
 	if (!node.expression) return;
 
 	const { code } = info;
+	const { arguments: args, callee, start, end } = node.expression;
 
-	if (node.expression.arguments.length === 0) {
-		code.remove(node.expression.callee.end, node.expression.end);
+	if (args.length === 0 || (args.length === 1 && args[0].name === 'event')) {
+		code.remove(callee.end, end);
 	} else {
 		const uses_event = find_event(node.expression);
 
@@ -19,20 +20,20 @@ export default function handle_on_directive(node, info, parent) {
 
 		rewrite_this(node.expression, info, true, this_replacement);
 
-		code.prependRight(node.expression.start, uses_event ? `event => ` : `() => `);
+		code.prependRight(start, uses_event ? `event => ` : `() => `);
 	}
 
-	let a = node.expression.start;
+	let a = start;
 	while (code.original[a - 1] !== '=') a -= 1;
-	const has_quote = a !== node.expression.start;
+	const has_quote = a !== start;
 
 	const needs_quote = !has_quote && (
-		/\s/.test(code.slice(node.expression.start, node.expression.end)) ||
-		node.expression.arguments.length > 0
+		/\s/.test(code.slice(start, end)) ||
+		args.length > 0
 	);
 
-	code.appendLeft(node.expression.start, needs_quote ? '"{' : '{');
-	code.prependRight(node.expression.end, needs_quote ? '}"' : '}');
+	code.appendLeft(start, needs_quote ? '"{' : '{');
+	code.prependRight(end, needs_quote ? '}"' : '}');
 }
 
 function find_event(expression) {
