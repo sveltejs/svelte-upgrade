@@ -74,6 +74,7 @@ export function upgradeTemplate(source) {
 	});
 
 	const info = {
+		source,
 		code,
 		lifecycle_functions: new Set(),
 		props,
@@ -267,7 +268,18 @@ export function upgradeTemplate(source) {
 			}
 
 			if (info.uses_this) {
-				script_sections.unshift(`// [svelte-upgrade suggestion]\n${indent}// manually refactor all references to __this\n${indent}const __this = {};`);
+				const this_props = [];
+
+				if (info.uses_this_properties.has('get')) {
+					const props = Array.from(info.props.keys());
+					this_props.push(`get: () => ({ ${props.join(', ')} })`);
+				}
+
+				const rhs = this_props.length
+					? `{\n${indent}${indent}${this_props.join(`\n${indent}${indent}`)}\n${indent}}`
+					: `{}`;
+
+				script_sections.unshift(`// [svelte-upgrade suggestion]\n${indent}// manually refactor all references to __this\n${indent}const __this = ${rhs};`);
 				info.manual_edits_suggested = true;
 			}
 

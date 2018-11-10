@@ -1,18 +1,28 @@
 import { walk } from 'estree-walker';
-import rewrite_set from './rewrite_set';
+import rewrite_set from './rewrite_set.js';
+import rewrite_get from './rewrite_get.js';
 
 // TODO rename this function, it does more than rewrite `this`
 export default function rewrite_this(node, info, is_event_handler, replacement = '__this') {
 	const { code, methods } = info;
 
 	walk(node, {
-		enter(child) {
+		enter(child, parent) {
 			if (/^Function/.test(child.type)) {
 				this.skip();
 			}
 
+			if (child.type === 'VariableDeclarator') {
+				if (child.init && child.init.type === 'CallExpression') {
+					if (is_method(child.init.callee, 'get')) {
+						rewrite_get(child, parent, info);
+						return this.skip();
+					}
+				}
+			}
+
 			if (child.type === 'CallExpression') {
-				if (is_set(child.callee, is_event_handler)) {
+				if (is_method(child.callee, 'set', is_event_handler)) {
 					rewrite_set(child, info);
 					return this.skip();
 				}
@@ -54,14 +64,14 @@ function is_this_property(node) {
 	);
 }
 
-function is_set(callee, is_event_handler) {
+function is_method(callee, name, is_event_handler) {
 	if (is_event_handler) {
-		return callee.type === 'Identifier' && callee.name === 'set';
+		return callee.type === 'Identifier' && callee.name === name;
 	}
 
 	return (
 		is_this_property(callee) &&
-		callee.property.name === 'set' &&
+		callee.property.name === name &&
 		!callee.property.computed
 	);
 }

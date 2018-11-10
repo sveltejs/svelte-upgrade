@@ -1,0 +1,13 @@
+<script>
+	import { onmount } from 'svelte';
+
+	export let items;
+
+	onmount(() => {
+		console.log(items);
+	});
+</script>
+
+{#each items as item}
+	<p>{item}</p>
+{/each}
