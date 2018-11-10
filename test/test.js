@@ -56,7 +56,7 @@ function testVersion(v, upgrader) {
 				throw new Error(`expected an error, but got output instead`);
 			}
 
-			t.equal(actual.trim(), expected.trim());
+			t.equal(actual, expected);
 		});
 	});
 }

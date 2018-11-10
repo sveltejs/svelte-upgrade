@@ -365,8 +365,10 @@ export function upgradeTemplate(source) {
 		upgraded = `<svelte:meta ${attributes.join(' ')}/>\n\n${upgraded}`;
 	}
 
+	const eof_newline = /(\r?\n)?$/.exec(source)[1];
+
 	return {
-		code: upgraded.trim(),
+		code: upgraded.trim() + eof_newline,
 		manual_edits_required: info.manual_edits_required,
 		manual_edits_suggested: info.manual_edits_suggested
 	};
