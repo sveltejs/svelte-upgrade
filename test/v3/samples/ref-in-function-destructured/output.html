@@ -1,0 +1,15 @@
+<script>
+	import { onmount } from 'svelte';
+
+	// [svelte-upgrade suggestion]
+	// manually refactor all references to __this
+	const __this = {};
+
+	export let canvas;
+
+	onmount(() => {
+		__this.ctx = canvas.getContext('2d');
+	});
+</script>
+
+<canvas ref:canvas></canvas>

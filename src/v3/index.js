@@ -16,6 +16,7 @@ import { find_declarations, get_code_frame } from './utils.js';
 import { extract_names } from './scopes.js';
 import rewrite_computed from './rewrite_computed.js';
 import handle_onstate_onupdate from './handlers/onstate_onupdate.js';
+import add_declaration from './handlers/shared/add_declaration.js';
 
 // We need to tell estree-walker that it should always
 // look for an `else` block, otherwise it might get
@@ -113,6 +114,8 @@ export function upgradeTemplate(source) {
 		// TODO set up indentExclusionRanges
 
 		default_export.declaration.properties.forEach(prop => {
+			// TODO could these conflict with props?
+
 			if (prop.key.name === 'methods') {
 				prop.value.properties.forEach(node => {
 					info.methods.add(node.key.name);
@@ -231,6 +234,8 @@ export function upgradeTemplate(source) {
 	let scope = new Set();
 	const scopes = [scope];
 
+	const refs = new Set();
+
 	walk(result.ast.html, {
 		enter(node, parent) {
 			switch (node.type) {
@@ -271,6 +276,12 @@ export function upgradeTemplate(source) {
 					// TODO also need to do this for expressions in blocks, attributes and directives
 					rewrite_computed(node, info, scope);
 					break;
+
+				case 'Ref':
+					if (!refs.has(node.name)) {
+						refs.add(node.name);
+						add_declaration(node, info);
+					}
 			}
 		},
 
@@ -310,6 +321,10 @@ export function upgradeTemplate(source) {
 		if (info.uses_dispatch) {
 			info.imported_functions.add('createEventDispatcher');
 			script_sections.push(`const dispatch = createEventDispatcher();`);
+		}
+
+		if (refs.size > 0) {
+			script_sections.push(Array.from(refs).map(name => `export let ${name};`).join(`\n${indent}`));
 		}
 
 		if (body) {

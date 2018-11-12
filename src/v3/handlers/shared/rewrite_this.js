@@ -13,15 +13,21 @@ export default function rewrite_this(node, info, is_event_handler, replacement =
 			}
 
 			if (child.type === 'VariableDeclarator') {
-				if (child.init && child.init.type === 'CallExpression') {
-					if (is_method(child.init.callee, 'get')) {
-						rewrite_get(child, parent, info);
-						return this.skip();
+				if (child.init) {
+					if (child.init.type === 'CallExpression') {
+						if (is_method(child.init.callee, 'get')) {
+							rewrite_get(child, parent, info);
+							return this.skip();
+						}
+					}
+
+					if (is_this_property(child.init) && child.init.property.name === 'refs') {
+						throw new Error(`TODO handle 'const { ... } = this.refs'`);
 					}
 				}
 			}
 
-			if (child.type === 'CallExpression') {
+			else if (child.type === 'CallExpression') {
 				if (is_method(child.callee, 'set', is_event_handler)) {
 					rewrite_set(child, info);
 					return this.skip();
@@ -30,7 +36,7 @@ export default function rewrite_this(node, info, is_event_handler, replacement =
 				// TODO optimise get
 			}
 
-			if (child.type === 'MemberExpression' && child.object.type === 'ThisExpression') {
+			else if (is_this_property(child)) {
 				if (!child.property.computed) {
 					if (methods.has(child.property.name)) {
 						code.remove(child.object.start, child.property.start);
@@ -53,6 +59,17 @@ export default function rewrite_this(node, info, is_event_handler, replacement =
 					}
 				}
 			}
+
+			else if (child.type === 'MemberExpression') {
+				if (is_this_property(child.object) && child.object.property.name === 'refs') {
+					if (child.property.computed) {
+						throw new Error(`TODO handle standalone this.refs`);
+					}
+
+					code.remove(child.object.start, child.property.start);
+					this.skip();
+				}
+			}
 		}
 	});
 }
@@ -60,7 +77,8 @@ export default function rewrite_this(node, info, is_event_handler, replacement =
 function is_this_property(node) {
 	return (
 		node.type === 'MemberExpression' &&
-		node.object.type === 'ThisExpression'
+		node.object.type === 'ThisExpression' &&
+		!node.property.computed
 	);
 }
 

@@ -14,7 +14,7 @@ export default function handle_on_directive(node, info, parent) {
 		code.overwrite(callee.start, callee.end, 'dispatch');
 	}
 
-	if (args.length === 0 || (args.length === 1 && args[0].name === 'event')) {
+	if (callee.type === 'Identifier' && (args.length === 0 || (args.length === 1 && args[0].name === 'event'))) {
 		code.remove(callee.end, end);
 	} else {
 		const uses_event = find_event(node.expression);
