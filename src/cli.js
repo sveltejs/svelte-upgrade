@@ -141,7 +141,7 @@ function get_tasks(items, in_dir, out_dir, arr = []) {
 				let message = `Wrote ${count(tasks.length)}`;
 
 				if (unchanged_count > 0) {
-					message += `. ${count(unchanged_count)} components required no changes`;
+					message += `. ${count(unchanged_count)} required no changes`;
 				}
 
 				console.error(c.cyan(message));

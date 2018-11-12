@@ -7,7 +7,7 @@ import handle_data from './handlers/data.js';
 import handle_methods from './handlers/methods.js';
 import handle_oncreate_ondestroy from './handlers/oncreate_ondestroy.js';
 import handle_on_directive from './handlers/on_directive';
-import handle_use_directive from './handlers/use_directive';
+import wrap_with_curlies from './handlers/wrap_with_curlies';
 import handle_registrants from './handlers/shared/handle_registrants.js';
 import handle_preload from './handlers/preload.js';
 import handle_setup from './handlers/setup.js';
@@ -268,7 +268,8 @@ export function upgradeTemplate(source) {
 					break;
 
 				case 'Action':
-					handle_use_directive(node, info, parent);
+				case 'Transition':
+					wrap_with_curlies(node, info, parent);
 					break;
 
 				case 'MustacheTag':

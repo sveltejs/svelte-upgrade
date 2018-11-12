@@ -1,4 +1,4 @@
-export default function handle_use_directive(node, info) {
+export default function wrap_with_curlies(node, info) {
 	if (!node.expression) return;
 
 	const { code } = info;

@@ -2,7 +2,7 @@ import rewrite_this from './shared/rewrite_this.js';
 import add_declaration from './shared/add_declaration.js';
 
 export default function handle_methods(node, info) {
-	const { blocks, code, error } = info;
+	const { blocks, code, error, indent } = info;
 	const statements = [];
 
 	let suggested = false;
@@ -37,7 +37,7 @@ export default function handle_methods(node, info) {
 	});
 
 	if (statements.length > 0) {
-		blocks.push(`${statements.join('\n')}`);
+		blocks.push(`${statements.join(`\n${indent}`)}`);
 	}
 
 	info.manual_edits_suggested = true;

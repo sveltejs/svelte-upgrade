@@ -48,10 +48,13 @@ export default function handle_data(node, info) {
 	}
 
 	returned.properties.forEach(prop => {
-		const body = code.original.slice(prop.value.start, prop.value.end)
-			.replace(indent_regex, '')
+		let body = code.original.slice(prop.value.start, prop.value.end)
 			.replace(indent_regex, '')
 			.replace(indent_regex, '');
+
+		if (node.type === 'FunctionExpression' || node.body.type === 'BlockStatement') {
+			body = body.replace(indent_regex, '')
+		}
 
 		props.set(prop.key.name, body);
 	});

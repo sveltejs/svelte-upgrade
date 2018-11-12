@@ -3,7 +3,7 @@ import alias_registration from './alias_registration.js';
 import add_declaration from './add_declaration.js';
 
 export default function handle_registrants(registrants, info, type) {
-	const { blocks, code, error } = info;
+	const { blocks, code, indent } = info;
 	const statements = [];
 
 	registrants.forEach(registrant => {
@@ -36,6 +36,6 @@ export default function handle_registrants(registrants, info, type) {
 	});
 
 	if (statements.length > 0) {
-		blocks.push(`${statements.join('\n')}`);
+		blocks.push(`${statements.join(`\n${indent}`)}`);
 	}
 }

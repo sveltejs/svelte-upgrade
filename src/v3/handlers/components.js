@@ -13,6 +13,6 @@ export default function handle_components(node, info) {
 	});
 
 	if (statements.length > 0) {
-		blocks.push(statements.join('\n'));
+		blocks.push(statements.join(`\n${info.indent}`));
 	}
 }
