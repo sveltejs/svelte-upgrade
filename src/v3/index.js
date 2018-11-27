@@ -268,6 +268,8 @@ export function upgradeTemplate(source) {
 					break;
 
 				case 'Action':
+				case 'Binding':
+				case 'Class':
 				case 'Transition':
 					wrap_with_curlies(node, info, parent);
 					break;

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import sade from 'sade';
-import glob from 'glob';
 import prompts from 'prompts';
 import c from 'kleur';
 import * as pkg from '../package.json';
@@ -32,8 +31,8 @@ function get_tasks(items, in_dir, out_dir, arr = []) {
 		if (stats.isDirectory()) {
 			get_tasks(
 				fs.readdirSync(item).map(file => path.resolve(item, file)),
-				path.join(in_dir, file),
-				path.join(out_dir, file),
+				path.join(in_dir, item),
+				path.join(out_dir, item),
 				arr
 			);
 		} else {
@@ -76,9 +75,11 @@ function get_tasks(items, in_dir, out_dir, arr = []) {
 			}
 
 			try {
+				console.log(1);
 				const upgrade = v === 2
 					? await import('./v2/index.js')
 					: await import('./v3/index.js');
+					console.log(2);
 
 				if (!opts.force) {
 					const existing = tasks
