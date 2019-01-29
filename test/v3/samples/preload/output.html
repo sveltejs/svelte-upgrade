@@ -1,4 +1,4 @@
-<script scope="shared">
+<script context="module">
 	export async function preload({ params }) {
 		const user = await this.fetch(`me.json`).then(r => r.json());
 		return { user };

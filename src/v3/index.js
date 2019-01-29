@@ -382,8 +382,7 @@ export function upgradeTemplate(source) {
 	}
 
 	if (info.shared_blocks.length > 0) {
-		// scope="shared" is subject to change
-		upgraded = `<script scope="shared">\n${indent}${info.shared_blocks.join(`\n\n${indent}`)}\n</script>\n\n${upgraded}`;
+		upgraded = `<script context="module">\n${indent}${info.shared_blocks.join(`\n\n${indent}`)}\n</script>\n\n${upgraded}`;
 	}
 
 	if (tag || namespace || immutable) { // TODO or bindings
