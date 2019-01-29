@@ -1,6 +1,7 @@
 import { walk } from 'estree-walker';
 import rewrite_set from './rewrite_set.js';
 import rewrite_get from './rewrite_get.js';
+import rewrite_refs from './rewrite_refs.js';
 
 // TODO rename this function, it does more than rewrite `this`
 export default function rewrite_this(node, info, is_event_handler, replacement = '__this') {
@@ -22,7 +23,8 @@ export default function rewrite_this(node, info, is_event_handler, replacement =
 					}
 
 					if (is_this_property(child.init) && child.init.property.name === 'refs') {
-						throw new Error(`TODO handle 'const { ... } = this.refs'`);
+						rewrite_refs(child, parent, info);
+						return this.skip();
 					}
 				}
 			}

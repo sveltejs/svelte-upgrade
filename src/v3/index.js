@@ -1,4 +1,4 @@
-import * as svelte from 'svelte';
+import * as svelte from 'svelte-2';
 import MagicString from 'magic-string';
 import { walk, childKeys } from 'estree-walker';
 import handle_components from './handlers/components.js';
@@ -79,6 +79,7 @@ export function upgradeTemplate(source) {
 		code,
 		imported_functions: new Set(),
 		props,
+		refs: new Map(),
 		blocks: [],
 		shared_blocks: [],
 		imports: [],
@@ -350,6 +351,11 @@ export function upgradeTemplate(source) {
 			if (info.uses_this_properties.has('get')) {
 				const props = Array.from(info.props.keys());
 				this_props.push(`get: () => ({ ${props.join(', ')} })`);
+			}
+
+			if (info.uses_this_properties.has('refs')) {
+				const refs = Array.from(info.refs.keys());
+				this_props.push(`refs: { ${refs.join(', ')} }`);
 			}
 
 			const rhs = this_props.length
