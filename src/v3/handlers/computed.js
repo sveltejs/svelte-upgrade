@@ -23,7 +23,6 @@ export default function handle_computed(node, info) {
 			info.manual_edits_required = true;
 		} else {
 			computed.value.params[0].properties.forEach(param => {
-				console.log(param);
 				if (param.type !== 'Property' || param.key !== param.value) {
 					info.error(`svelte-upgrade cannot currently process non-identifier computed property arguments`, param.start);
 				}

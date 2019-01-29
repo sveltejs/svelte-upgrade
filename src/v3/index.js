@@ -284,7 +284,10 @@ export function upgradeTemplate(source) {
 						add_declaration(node, info);
 					}
 
-					code.overwrite(node.start, node.end, `bind:this={${node.name}}`);
+					let { start, end } = node;
+					while (/\s/.test(source[end - 1])) end -= 1;
+
+					code.overwrite(start, end, `bind:this={${node.name}}`);
 					break;
 			}
 		},
