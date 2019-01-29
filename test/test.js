@@ -41,7 +41,8 @@ function testVersion(v, upgrader) {
 
 					expected_error.frame = expected_error.frame
 						.replace('\n', '')
-						.replace(/^\t\t/gm, '');
+						.replace(/^\t\t/gm, '')
+						.replace(/\s+$/gm, '');
 
 					if (err.code !== 'ENOENT') {
 						t.equal(serialize_error(err), serialize_error(expected_error));
@@ -68,6 +69,6 @@ function serialize_error(err) {
 	return JSON.stringify({
 		message: err.message,
 		pos: err.pos,
-		frame: err.frame
+		frame: err.frame.replace(/\s+$/gm, '')
 	}, null, '  ');
 }

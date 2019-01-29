@@ -14,7 +14,6 @@ import handle_setup from './handlers/setup.js';
 import handle_store from './handlers/store.js';
 import { find_declarations, get_code_frame } from './utils.js';
 import { extract_names } from './scopes.js';
-import rewrite_computed from './rewrite_computed.js';
 import handle_onstate_onupdate from './handlers/onstate_onupdate.js';
 import add_declaration from './handlers/shared/add_declaration.js';
 
@@ -277,8 +276,6 @@ export function upgradeTemplate(source) {
 
 				case 'MustacheTag':
 				case 'RawMustacheTag':
-					// TODO also need to do this for expressions in blocks, attributes and directives
-					rewrite_computed(node, info, scope);
 					break;
 
 				case 'Ref':

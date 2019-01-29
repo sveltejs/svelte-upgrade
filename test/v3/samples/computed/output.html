@@ -2,19 +2,18 @@
 	export let a;
 	export let b;
 
-	function c() {
-		return a + b;
-	}
+	export let c;
+	$: c = a + b;
 
-	function d() {
-		return c() * c();
-	}
+	export let d;
+	$: d = c * c;
 
-	function e() {
-		return Math.pow(d(), d());
+	export let e;
+	$: {
+		e = Math.pow(d, d);
 	}
 </script>
 
-<p>{a} + {b} = {c()}</p>
-<p>{c()} * {c()} = {d()}</p>
-<p>{d()} ^ {d()} = {e()}</p>
+<p>{a} + {b} = {c}</p>
+<p>{c} * {c} = {d}</p>
+<p>{d} ^ {d} = {e}</p>

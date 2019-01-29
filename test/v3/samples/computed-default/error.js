@@ -1,5 +1,5 @@
 module.exports = {
-	message: "svelte-upgrade cannot currently process default computed property arguments",
+	message: "svelte-upgrade cannot currently process non-identifier computed property arguments",
 	pos: 72,
 	frame: `
 		4:   export default {
