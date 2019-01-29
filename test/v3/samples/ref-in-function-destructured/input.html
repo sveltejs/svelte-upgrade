@@ -1,0 +1,10 @@
+<canvas ref:canvas></canvas>
+
+<script>
+	export default {
+		oncreate() {
+			const { canvas } = this.refs;
+			this.ctx = canvas.getContext('2d');
+		}
+	};
+</script>

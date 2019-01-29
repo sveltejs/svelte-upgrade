@@ -1,0 +1,28 @@
+<script>
+	import { onMount } from 'svelte';
+
+	// [svelte-upgrade suggestion]
+	// manually refactor all references to __this
+	const __this = {
+		sayHello: (...args) => sayHello(...args),
+		say: (...args) => say(...args)
+	};
+
+	function sayHello() {
+		__this.say('hello!');
+	}
+
+	function say(msg) {
+		alert(msg);
+	}
+
+	onMount(() => {
+		sayHello();
+	});
+
+	// [svelte-upgrade suggestion]
+	// review these exports
+	export { sayHello, say };
+</script>
+
+<button on:click={sayHello}>say hello</button>

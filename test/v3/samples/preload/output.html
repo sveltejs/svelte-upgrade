@@ -1,0 +1,12 @@
+<script context="module">
+	export async function preload({ params }) {
+		const user = await this.fetch(`me.json`).then(r => r.json());
+		return { user };
+	}
+</script>
+
+<script>
+	export let user;
+</script>
+
+<h1>Hello {user.name}</h1>

@@ -1,0 +1,19 @@
+<script>
+	export let a;
+	export let b;
+
+	export let c;
+	$: c = a + b;
+
+	export let d;
+	$: d = c * c;
+
+	export let e;
+	$: {
+		e = Math.pow(d, d);
+	}
+</script>
+
+<p>{a} + {b} = {c}</p>
+<p>{c} * {c} = {d}</p>
+<p>{d} ^ {d} = {e}</p>

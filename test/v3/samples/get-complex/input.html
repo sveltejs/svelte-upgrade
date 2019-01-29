@@ -1,0 +1,8 @@
+<script>
+	export default {
+		oncreate() {
+			const { foo = 1, bar: baz } = this.get();
+			console.log(foo, baz);
+		}
+	};
+</script>

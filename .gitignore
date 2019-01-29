@@ -3,3 +3,5 @@ node_modules
 *.d.ts
 dist
 yarn-error.log
+test/*/samples/_tmp
+_actual.html

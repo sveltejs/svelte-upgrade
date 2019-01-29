@@ -1,0 +1,13 @@
+<button on:click="doThing(event)">
+	clicks: {count}
+</button>
+
+<script>
+	export default {
+		methods: {
+			doThing(event) {
+				console.log(event);
+			}
+		}
+	};
+</script>

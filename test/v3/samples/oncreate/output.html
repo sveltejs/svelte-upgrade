@@ -1,0 +1,13 @@
+<script>
+	import { onMount } from 'svelte';
+
+	// [svelte-upgrade suggestion]
+	// manually refactor all references to __this
+	const __this = {};
+
+	onMount(() => {
+		__this.wasCreated = true;
+	});
+</script>
+
+<h1>component with oncreate</h1>

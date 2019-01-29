@@ -1,0 +1,12 @@
+{#each items as item}
+	<p>{item}</p>
+{/each}
+
+<script>
+	export default {
+		oncreate() {
+			const { items } = this.get();
+			console.log(items);
+		}
+	};
+</script>

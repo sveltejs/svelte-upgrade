@@ -1,0 +1,11 @@
+<h1>component with onupdate</h1>
+
+<script>
+	export default {
+		onupdate({ changed, current }) {
+			if (changed.foo) {
+				console.log(current.foo);
+			}
+		}
+	};
+</script>

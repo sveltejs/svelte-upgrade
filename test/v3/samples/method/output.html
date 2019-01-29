@@ -1,0 +1,19 @@
+<script>
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		sayHello();
+	});
+
+	// [svelte-upgrade suggestion]
+	// review these functions and remove unnecessary 'export' keywords
+	export function sayHello() {
+		say('hello!');
+	}
+
+	export function say(msg) {
+		alert(msg);
+	}
+</script>
+
+<button on:click={sayHello}>say hello</button>

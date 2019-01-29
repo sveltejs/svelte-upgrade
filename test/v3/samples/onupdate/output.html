@@ -1,0 +1,14 @@
+<script>
+	import { afterUpdate } from 'svelte';
+
+	// [svelte-upgrade warning]
+	// beforeUpdate and afterUpdate handlers behave
+	// differently to their v2 counterparts
+	afterUpdate(() => {
+		if (changed.foo) {
+			console.log(current.foo);
+		}
+	});
+</script>
+
+<h1>component with onupdate</h1>
