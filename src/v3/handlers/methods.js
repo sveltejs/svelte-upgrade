@@ -28,7 +28,7 @@ export default function handle_methods(node, info) {
 			suggested = true;
 
 			add_declaration(method.key, info);
-			blocks.push(`${suggestion}export ${node.async ? `async ` : ``}function ${method.key.name}${args} ${str}`);
+			blocks.push(`${suggestion}export ${method.value.async ? `async ` : ``}function ${method.key.name}${args} ${str}`);
 		} else if (method.value.type === 'Identifier') {
 			throw new Error(`TODO identifier methods`);
 		} else {
