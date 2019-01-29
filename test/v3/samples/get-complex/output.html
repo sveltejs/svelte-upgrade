@@ -1,5 +1,5 @@
 <script>
-	import { onmount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	// [svelte-upgrade suggestion]
 	// manually refactor all references to __this
@@ -10,7 +10,7 @@
 	export let foo;
 	export let bar;
 
-	onmount(() => {
+	onMount(() => {
 		const { foo = 1, bar: baz } = __this.get();
 		console.log(foo, baz);
 	});

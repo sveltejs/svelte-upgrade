@@ -1,10 +1,10 @@
 <script>
-	import { onprops } from 'svelte';
+	import { beforeUpdate } from 'svelte';
 
 	// [svelte-upgrade warning]
-	// onprops and onupdate handlers behave
+	// beforeUpdate and afterUpdate handlers behave
 	// differently to their v2 counterparts
-	onprops(() => {
+	beforeUpdate(() => {
 		if (changed.foo) {
 			console.log(current.foo);
 		}

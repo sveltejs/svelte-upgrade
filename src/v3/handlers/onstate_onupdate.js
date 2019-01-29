@@ -11,7 +11,7 @@ export default function handle_onstate_onupdate(node, info, name) {
 		const body = code.slice(node.body.start, node.body.end)
 			.replace(indent_regex, '');
 
-		blocks.push(`// [svelte-upgrade warning]\n${indent}// onprops and onupdate handlers behave\n${indent}// differently to their v2 counterparts\n${indent}${name}(${node.async ? `async ` : ``}() => ${body});`);
+		blocks.push(`// [svelte-upgrade warning]\n${indent}// beforeUpdate and afterUpdate handlers behave\n${indent}// differently to their v2 counterparts\n${indent}${name}(${node.async ? `async ` : ``}() => ${body});`);
 	}
 
 	else {

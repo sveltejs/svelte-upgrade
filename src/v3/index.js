@@ -174,19 +174,19 @@ export function upgradeTemplate(source) {
 					break;
 
 					case 'oncreate': case 'onrender':
-					handle_oncreate_ondestroy(prop.value, info, 'onmount');
+					handle_oncreate_ondestroy(prop.value, info, 'onMount');
 					break;
 
 				case 'ondestroy': case 'onteardown':
-					handle_oncreate_ondestroy(prop.value, info, 'ondestroy');
+					handle_oncreate_ondestroy(prop.value, info, 'onDestroy');
 					break;
 
 				case 'onstate':
-					handle_onstate_onupdate(prop.value, info, 'onprops');
+					handle_onstate_onupdate(prop.value, info, 'beforeUpdate');
 					break;
 
 				case 'onupdate':
-					handle_onstate_onupdate(prop.value, info, 'onupdate');
+					handle_onstate_onupdate(prop.value, info, 'afterUpdate');
 					break;
 
 				case 'preload':
@@ -285,6 +285,9 @@ export function upgradeTemplate(source) {
 						refs.add(node.name);
 						add_declaration(node, info);
 					}
+
+					code.overwrite(node.start, node.end, `bind:this={${node.name}}`);
+					break;
 			}
 		},
 

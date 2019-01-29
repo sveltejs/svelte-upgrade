@@ -75,11 +75,9 @@ function get_tasks(items, in_dir, out_dir, arr = []) {
 			}
 
 			try {
-				console.log(1);
 				const upgrade = v === 2
 					? await import('./v2/index.js')
 					: await import('./v3/index.js');
-					console.log(2);
 
 				if (!opts.force) {
 					const existing = tasks
