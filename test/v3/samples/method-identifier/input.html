@@ -1,0 +1,22 @@
+<button on:click=sayHello()>say hello</button>
+
+<script>
+	function sayHello() {
+		this.say('hello!');
+	}
+
+	function say(msg) {
+		alert(msg);
+	}
+
+	export default {
+		oncreate() {
+			this.sayHello();
+		},
+
+		methods: {
+			sayHello,
+			say
+		}
+	};
+</script>
